@@ -1,0 +1,723 @@
+{
+    "xml_metadata": {
+        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Envelope",
+        "attrib": {
+            "{http://schemas.dmtf.org/ovf/envelope/1}version": "1.0",
+            "{http://www.w3.org/XML/1998/namespace}lang": "en-US"
+        },
+        "children": [
+            {
+                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}References",
+                "attrib": {},
+                "children": [
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}File",
+                        "attrib": {
+                            "{http://schemas.dmtf.org/ovf/envelope/1}id": "file1",
+                            "{http://schemas.dmtf.org/ovf/envelope/1}href": "EternalBlue able-disk001.vmdk"
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}DiskSection",
+                "attrib": {},
+                "children": [
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                        "attrib": {},
+                        "children": []
+                    },
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Disk",
+                        "attrib": {
+                            "{http://schemas.dmtf.org/ovf/envelope/1}capacity": "214748364800",
+                            "{http://schemas.dmtf.org/ovf/envelope/1}diskId": "vmdisk1",
+                            "{http://schemas.dmtf.org/ovf/envelope/1}fileRef": "file1",
+                            "{http://schemas.dmtf.org/ovf/envelope/1}format": "http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized",
+                            "{http://www.virtualbox.org/ovf/machine}uuid": "e4ce73b5-930b-4f94-9878-dffb7a8c27b1"
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}NetworkSection",
+                "attrib": {},
+                "children": [
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                        "attrib": {},
+                        "children": []
+                    },
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Network",
+                        "attrib": {
+                            "{http://schemas.dmtf.org/ovf/envelope/1}name": "Bridged"
+                        },
+                        "children": [
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Description",
+                                "attrib": {},
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}VirtualSystem",
+                "attrib": {
+                    "{http://schemas.dmtf.org/ovf/envelope/1}id": "EternalBlue able"
+                },
+                "children": [
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                        "attrib": {},
+                        "children": []
+                    },
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}OperatingSystemSection",
+                        "attrib": {
+                            "{http://schemas.dmtf.org/ovf/envelope/1}id": "120"
+                        },
+                        "children": [
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                                "attrib": {},
+                                "children": []
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Description",
+                                "attrib": {},
+                                "children": []
+                            },
+                            {
+                                "tag": "{http://www.virtualbox.org/ovf/machine}OSType",
+                                "attrib": {
+                                    "{http://schemas.dmtf.org/ovf/envelope/1}required": "false"
+                                },
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}VirtualHardwareSection",
+                        "attrib": {},
+                        "children": [
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                                "attrib": {},
+                                "children": []
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}System",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData}VirtualSystemIdentifier",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData}VirtualSystemType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}VirtualQuantity",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}AllocationUnits",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}VirtualQuantity",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Address",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceSubType",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Address",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}AddressOnParent",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}AutomaticAllocation",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceSubType",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}AddressOnParent",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Description",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}HostResource",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Parent",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Item",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}AutomaticAllocation",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Caption",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}Connection",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ElementName",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}InstanceID",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceSubType",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData}ResourceType",
+                                        "attrib": {},
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "tag": "{http://www.virtualbox.org/ovf/machine}Machine",
+                        "attrib": {
+                            "{http://schemas.dmtf.org/ovf/envelope/1}required": "false",
+                            "version": "1.15-windows",
+                            "uuid": "{34d73b00-786b-4ab3-9724-f2ec1f42e91d}",
+                            "name": "EternalBlue able",
+                            "OSType": "Windows10_64",
+                            "snapshotFolder": "Snapshots",
+                            "lastStateChange": "2020-09-13T08:38:47Z"
+                        },
+                        "children": [
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Info",
+                                "attrib": {},
+                                "children": []
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}ExtraData",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}ExtraDataItem",
+                                        "attrib": {
+                                            "name": "GUI/LastCloseAction",
+                                            "value": "PowerOff"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}ExtraDataItem",
+                                        "attrib": {
+                                            "name": "GUI/LastNormalWindowPosition",
+                                            "value": "0,23,800,642"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Hardware",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}CPU",
+                                        "attrib": {},
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}PAE",
+                                                "attrib": {
+                                                    "enabled": "false"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}LongMode",
+                                                "attrib": {
+                                                    "enabled": "true"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}HardwareVirtExLargePages",
+                                                "attrib": {
+                                                    "enabled": "true"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Memory",
+                                        "attrib": {
+                                            "RAMSize": "4096"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}HID",
+                                        "attrib": {
+                                            "Pointing": "USBTablet"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Paravirt",
+                                        "attrib": {
+                                            "provider": "Default"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Display",
+                                        "attrib": {
+                                            "controller": "VBoxSVGA",
+                                            "VRAMSize": "128"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}VideoCapture",
+                                        "attrib": {
+                                            "screens": "1",
+                                            "file": ".",
+                                            "fps": "25"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}RemoteDisplay",
+                                        "attrib": {
+                                            "enabled": "false"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}BIOS",
+                                        "attrib": {},
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}IOAPIC",
+                                                "attrib": {
+                                                    "enabled": "true"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}SmbiosUuidLittleEndian",
+                                                "attrib": {
+                                                    "enabled": "true"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}USB",
+                                        "attrib": {},
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Controllers",
+                                                "attrib": {},
+                                                "children": [
+                                                    {
+                                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Controller",
+                                                        "attrib": {
+                                                            "name": "OHCI",
+                                                            "type": "OHCI"
+                                                        },
+                                                        "children": []
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Network",
+                                        "attrib": {},
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Adapter",
+                                                "attrib": {
+                                                    "slot": "0",
+                                                    "enabled": "true",
+                                                    "cable": "true",
+                                                    "type": "82540EM"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}DisabledModes",
+                                                        "attrib": {},
+                                                        "children": [
+                                                            {
+                                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}InternalNetwork",
+                                                                "attrib": {
+                                                                    "name": "intnet"
+                                                                },
+                                                                "children": []
+                                                            },
+                                                            {
+                                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}NATNetwork",
+                                                                "attrib": {
+                                                                    "name": "NatNetwork"
+                                                                },
+                                                                "children": []
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}BridgedInterface",
+                                                        "attrib": {
+                                                            "name": "Realtek PCIe GbE Family Controller"
+                                                        },
+                                                        "children": []
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}AudioAdapter",
+                                        "attrib": {
+                                            "controller": "HDA",
+                                            "driver": "DirectSound",
+                                            "enabled": "true",
+                                            "enabledIn": "false"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Clipboard",
+                                        "attrib": {},
+                                        "children": []
+                                    },
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}GuestProperties",
+                                        "attrib": {},
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}GuestProperty",
+                                                "attrib": {
+                                                    "name": "/VirtualBox/HostInfo/GUI/LanguageID",
+                                                    "value": "en_US",
+                                                    "timestamp": "1599986327946278000",
+                                                    "flags": ""
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}StorageControllers",
+                                "attrib": {},
+                                "children": [
+                                    {
+                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}StorageController",
+                                        "attrib": {
+                                            "name": "SATA",
+                                            "type": "AHCI",
+                                            "PortCount": "2",
+                                            "useHostIOCache": "false",
+                                            "Bootable": "true",
+                                            "IDE0MasterEmulationPort": "0",
+                                            "IDE0SlaveEmulationPort": "1",
+                                            "IDE1MasterEmulationPort": "2",
+                                            "IDE1SlaveEmulationPort": "3"
+                                        },
+                                        "children": [
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}AttachedDevice",
+                                                "attrib": {
+                                                    "type": "HardDisk",
+                                                    "hotpluggable": "false",
+                                                    "port": "0",
+                                                    "device": "0"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "tag": "{http://schemas.dmtf.org/ovf/envelope/1}Image",
+                                                        "attrib": {
+                                                            "uuid": "{e4ce73b5-930b-4f94-9878-dffb7a8c27b1}"
+                                                        },
+                                                        "children": []
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "tag": "{http://schemas.dmtf.org/ovf/envelope/1}AttachedDevice",
+                                                "attrib": {
+                                                    "passthrough": "false",
+                                                    "type": "DVD",
+                                                    "hotpluggable": "false",
+                                                    "port": "1",
+                                                    "device": "0"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "file_hashes": {
+        "md5": "15230f86c7fda3d664576a5e77b93629",
+        "sha1": "bdadffef25ac2a3e7724357db67f821eef2eb573",
+        "sha256": "a8b7ec167663149876940348c14b01b30fb96580424ac162a0684d535c0f7d0d"
+    }
+}
