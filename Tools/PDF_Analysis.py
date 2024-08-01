@@ -5,6 +5,9 @@ from pdfminer.high_level import extract_text
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 import whois
+import os
+import json
+from datetime import datetime
 
 # API Key for Hybrid Analysis
 API_KEY = 'yvtl3enod5f6cf1bu7b0jdmm47309335hzhtsqsrc85756f94sxvhltsf3427177'
@@ -12,6 +15,9 @@ API_KEY = 'yvtl3enod5f6cf1bu7b0jdmm47309335hzhtsqsrc85756f94sxvhltsf3427177'
 # Get the input from the user
 print("Please input the path to the PDF file: ")
 PDF = input()
+
+# Wait for the user to press Enter to start the process
+input("Press Enter to start the process...")
 
 # Extract the content from the file
 def extract_text_from_pdf(file_path):
@@ -43,6 +49,8 @@ def get_pdf_metadata(file_path):
             parser = PDFParser(file)
             document = PDFDocument(parser)
             metadata = document.info[0]
+            # Convert bytes to strings in metadata
+            metadata = {key: (value.decode('utf-8', errors='ignore') if isinstance(value, bytes) else value) for key, value in metadata.items()}
             return metadata
     except FileNotFoundError:
         print(f"The file '{file_path}' does not exist.")
@@ -134,3 +142,54 @@ for url in urls:
     if is_valid_url(url):
         domain_info = whois_lookup(url)
         print(f"WHOIS info for {url}: {domain_info}")
+
+def save_to_json(data, filename):
+    """
+    Save data to a JSON file.
+    
+    :param data: The data to save.
+    :param filename: The name of the file to save the data to.
+    """
+    with open(filename, 'w') as json_file:
+        json.dump(data, json_file, indent=4)
+    print(f"Data has been saved to {filename}")
+
+def get_current_datetime():
+    """
+    Get the current date and time formatted as YYYYMMDD_HHMMSS.
+    """
+    now = datetime.now()
+    return now.strftime('%Y%m%d_%H%M%S')
+
+def main():
+    # Assuming `data` is the data you want to save
+    data = {
+        'text': text,
+        'line_count': line_count,
+        'metadata': metadata,
+        'urls': urls
+        # your data structure
+    }
+    
+    print("Prompting for user input...")
+    save_as_json = input("Do you want to save the data as JSON? (yes/no): ").strip().lower()
+    print(f"User input: {save_as_json}")
+    
+    if save_as_json == 'yes':
+        # Define the JSON output directory
+        json_output_dir = os.path.join('JSON')
+        os.makedirs(json_output_dir, exist_ok=True)
+        
+        # Define the JSON file name
+        base_filename = os.path.basename(PDF)
+        base_name, _ = os.path.splitext(base_filename)
+        current_datetime = get_current_datetime()
+        json_filename = os.path.join(json_output_dir, f'{base_name}_{current_datetime}.json')
+        
+        # Save the data to JSON
+        save_to_json(data, json_filename)
+    else:
+        print("Data was not saved as JSON.")
+
+if __name__ == "__main__":
+    main()
