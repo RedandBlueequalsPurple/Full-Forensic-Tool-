@@ -8,9 +8,21 @@ import whois
 import os
 import json
 from datetime import datetime
+import socket
 
-# API Key for Hybrid Analysis
-API_KEY = 'yvtl3enod5f6cf1bu7b0jdmm47309335hzhtsqsrc85756f94sxvhltsf3427177'
+# API Key and Server Configuration
+def get_config():
+    return {
+        'api_key': 'rgjdcvgm0a826723tesmchjz9f006785f4emp6r514d054e7xf3oukym060041a7',
+        'api_secret': '66abc1bfd77c3ab09e0e2444',
+        'server': 'https://www.hybrid-analysis.com'
+    }
+
+# Fetch API Key and Server
+config = get_config()
+API_KEY = config['api_key']
+API_SECRET = config['api_secret']
+SERVER = config['server']
 
 # Get the input from the user
 print("Please input the path to the PDF file: ")
@@ -106,10 +118,69 @@ def check_url_hybrid_analysis(url):
         'url': url
     }
     try:
-        response = requests.post('https://api.hybrid-analysis.com/v2/url/scan', headers=headers, data=data)
+        response = requests.post(f'{SERVER}/v2/url/scan', headers=headers, data=data)
         if response.status_code == 200:
             result = response.json()
             return result
+        else:
+            return f"Error: {response.status_code}, {response.text}"
+    except requests.RequestException as e:
+        return f"An error occurred: {e}"
+
+# Test Hybrid Analysis endpoint
+def test_hybrid_analysis_endpoint():
+    test_url = 'http://example.com'
+    headers = {
+        'Authorization': f'Bearer {API_KEY}'
+    }
+    data = {
+        'url': test_url
+    }
+    try:
+        response = requests.post(f'{SERVER}/v2/url/scan', headers=headers, data=data)
+        print(f"Hybrid Analysis test endpoint status code: {response.status_code}")
+        print(f"Response: {response.json()}")
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+
+# Check if a domain is resolvable
+def check_domain_resolution(domain):
+    try:
+        ip = socket.gethostbyname(domain)
+        print(f"Domain {domain} resolves to IP: {ip}")
+        return True
+    except socket.gaierror:
+        print(f"Domain {domain} does not resolve.")
+        return False
+
+# Function to search for samples
+def search_samples(query):
+    url = f'{SERVER}/v2/search'
+    headers = {
+        'Authorization': f'Bearer {API_KEY}'
+    }
+    params = {
+        'query': query
+    }
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return f"Error: {response.status_code}, {response.text}"
+    except requests.RequestException as e:
+        return f"An error occurred: {e}"
+
+# Function to get sample summary
+def get_sample_summary(sample_id):
+    url = f'{SERVER}/v2/sample/{sample_id}/summary'
+    headers = {
+        'Authorization': f'Bearer {API_KEY}'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
         else:
             return f"Error: {response.status_code}, {response.text}"
     except requests.RequestException as e:
@@ -127,21 +198,34 @@ if metadata is not None:
     for key, value in metadata.items():
         print(f"{key}: {value}")
 
-# Check URL status and Hybrid Analysis
-for url in urls:
-    if is_valid_url(url):
-        status = check_url_status(url)
-        print(f"Status of {url}: {status}")
-        result = check_url_hybrid_analysis(url)
-        print(f"Hybrid Analysis result for {url}: {result}")
-    else:
-        print(f"{url} is not a valid URL")
+# Check domain resolution for Hybrid Analysis API
+if check_domain_resolution('www.hybrid-analysis.com'):
+    # Check URL status and Hybrid Analysis
+    for url in urls:
+        if is_valid_url(url):
+            status = check_url_status(url)
+            print(f"Status of {url}: {status}")
+            result = check_url_hybrid_analysis(url)
+            print(f"Hybrid Analysis result for {url}: {result}")
+        else:
+            print(f"{url} is not a valid URL")
 
-# WHOIS lookup
-for url in urls:
-    if is_valid_url(url):
-        domain_info = whois_lookup(url)
-        print(f"WHOIS info for {url}: {domain_info}")
+    # WHOIS lookup
+    for url in urls:
+        if is_valid_url(url):
+            domain_info = whois_lookup(url)
+            print(f"WHOIS info for {url}: {domain_info}")
+
+    # Example usage of search and summary functions
+    search_query = 'similar-to:35047ad869607de0a52d54be5998f268c719bb655e168f9bff8356b1f1239c55'
+    search_results = search_samples(search_query)
+    print("Search Results:", search_results)
+
+    sample_id = '01837d9b63b19d04125dfcce7941f7ac0e388f67b469ba8dea9c910d5cafe363'
+    summary = get_sample_summary(sample_id)
+    print("Sample Summary:", summary)
+else:
+    print("Skipping API checks due to domain resolution failure.")
 
 def save_to_json(data, filename):
     """
