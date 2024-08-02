@@ -65,7 +65,6 @@ def cli_mode():
     metadata = load_metadata(metadata_file)
 
     if metadata is None:
-        print("Failed to load metadata.")
         sys.exit(1)
 
     if query:
