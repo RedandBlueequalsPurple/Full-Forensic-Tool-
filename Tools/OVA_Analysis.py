@@ -5,6 +5,7 @@ import json
 import subprocess
 import hashlib
 from datetime import datetime
+from tqdm import tqdm
 
 def element_to_dict(element):
     """Recursively convert an XML element to a dictionary."""
@@ -49,9 +50,18 @@ if not os.path.isfile(FilePath):
 extractDir = "extracted_ova"
 os.makedirs(extractDir, exist_ok=True)
 
-# Extract the OVA file
+# Extract the OVA file with a progress bar
 with tarfile.open(FilePath, 'r') as tar:
-    tar.extractall(path=extractDir)
+    members = tar.getmembers()
+    total_members = len(members)
+    next_print_percentage = 10
+    
+    for i, member in enumerate(tqdm(members, desc="Extracting OVA")):
+        tar.extract(member, path=extractDir)
+        current_percentage = (i + 1) * 100 / total_members
+        if current_percentage >= next_print_percentage:
+            print(f"Extraction progress: {int(current_percentage)}%")
+            next_print_percentage += 10
 
 # Locate the OVF file in the extracted directory
 OvfFilePath = None
@@ -123,8 +133,15 @@ try:
         with open(jsonFilePath, 'w') as json_file:
             json_file.write(metadata_json)
 
-        # Send JSON data to the script using a subprocess
-        subprocess.run(["python3", "OVA_DB_AFTER_ANALYSIS.py", jsonFilePath], check=True)
+        # Use absolute path or handle spaces in the path
+        script_path = os.path.join("/Users/mymac/Desktop/VS /python/Full Forensic Tool", "OVA_DB_AFTER_ANALYSIS.py")
+        
+        # Debugging: Print the script path
+        print(f"Script path: {script_path}")
+        print(f"JSON file path: {jsonFilePath}")
+        
+        # Properly handle spaces in the script path
+        subprocess.run(["python3", script_path, jsonFilePath], check=True)
 except ET.ParseError as e:
     print(f"ParseError: {e}")
 except Exception as e:
