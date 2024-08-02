@@ -1,0 +1,72 @@
+To update the script for handling new fields like description, you will need to modify the following parts:
+
+1. Processing New Fields
+Update the section where you process new JSON files to include the new field:
+
+python
+Copy code
+# Process new files
+for json_file in new_files:
+    file_path = os.path.join(json_directory, json_file)
+    data = load_json(file_path)
+
+    if 'file_hashes' not in data:
+        print(f"File {json_file} does not contain 'file_hashes' key. Skipping.")
+        continue
+
+    hashes = data['file_hashes']
+    required_fields = ['md5', 'sha1', 'sha256']
+    if all(field in hashes for field in required_fields):
+        # Include new fields if present
+        description = data.get('description', 'No description')  # Default value if not present
+
+        data_store.append({
+            'MD5': hashes['md5'],
+            'SHA1': hashes['sha1'],
+            'SHA256': hashes['sha256'],
+            'source_file': json_file,
+            'description': description  # New field
+        })
+        print(f"Processed file: {json_file}")
+    else:
+        print(f"File {json_file} missing required fields. Skipping.")
+2. Display All MD5 Hashes
+Update the function to display MD5 hashes with the new field:
+
+python
+Copy code
+# Function to display all MD5 hashes with source files and descriptions
+def display_all_md5():
+    if data_store:
+        for entry in data_store:
+            print(f"MD5: {entry['MD5']}, Source File: {entry['source_file']}, Description: {entry['description']}")
+    else:
+        print("No data available.")
+3. Display All Entries
+Update the function to include the new field:
+
+python
+Copy code
+# Function to display all entries
+def display_all_entries():
+    if data_store:
+        for entry in data_store:
+            print(f"MD5: {entry['MD5']}, SHA1: {entry['SHA1']}, SHA256: {entry['SHA256']}, Source File: {entry['source_file']}, Description: {entry['description']}")
+    else:
+        print("No data available.")
+4. Query Data Store
+Update the query function to include the new field:
+
+python
+Copy code
+# Function to query the data store
+def query_data_store(query):
+    results = []
+    for entry in data_store:
+        if (query.lower() in entry['MD5'].lower() or
+            query.lower() in entry['SHA1'].lower() or
+            query.lower() in entry['SHA256'].lower() or
+            query.lower() in entry['description'].lower()):  # Include new field in search
+            results.append(entry)
+    return results
+These updates will allow your script to handle and display the new description field along with MD5 hashes. Adjust the field names and defaults as needed for your specific use case.
