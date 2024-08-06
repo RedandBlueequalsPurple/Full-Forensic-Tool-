@@ -7,7 +7,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 #if __name__ == '__main__':
 
 print(" Choose which tool you need:")
-ListOfTools = [[1, 'Email'],[2, 'PDF'],[3, 'ISO'],[4, 'OVA'],[5, 'URL'],[6, 'JSON'],[7, 'EVENT VIEWER'],[8, 'PNG'],[9, 'CODE'],[10, 'EXE / DMG']]
+ListOfTools = [[1, 'Email'],[2, 'PDF'],[3, 'ISO'],[4, 'OVA'],[5, 'URL'],
+               [6, 'JSON'],[7, 'DB'],[8, 'PNG'],[9, 'CODE'],[10, 'EXE / DMG'],[11, 'EVENT VIEWER']]
 for i in ListOfTools:
     print(i[0], i[1])
 
@@ -47,9 +48,9 @@ while True:
         JSON_Analysis.main()
         break
     elif Choice == "7" :
-        print("Email Analysis was selected")
-        import Tools.Email_Analysis as Email_Analysis
-        Email_Analysis.main()
+        print("DB was selected")
+        import DB.main_DB as main_DB
+        main_DB.main()
         break
     elif Choice == "8":
         print("OVA Analysis was selected")
@@ -62,6 +63,11 @@ while True:
         URL_Analysis.main()
         break
     elif Choice == "10":
+        print("URL Analysis was selected")
+        import Tools.URL_Analysis as URL_Analysis
+        URL_Analysis.main()
+        break
+    elif Choice == "11":
         print("URL Analysis was selected")
         import Tools.URL_Analysis as URL_Analysis
         URL_Analysis.main()
