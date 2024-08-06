@@ -1,0 +1,194 @@
+conda deactivate
+
+
+https://chatgpt.com/share/87a07ab1-1200-4b97-8742-ee009c86c341
+
+/Users/mymac/Desktop/VS /python/Full Forensic Tool /JSON/metadata.json
+
+
+/Users/mymac/Downloads/wazuh-4.7.4.ova
+/Volumes/Elements/ova hackeru/EternalBlue able.ova
+/Volumes/Elements/ova hackeru/SIEMnSOC_Final v1.1.ova
+/Volumes/Elements/hacking lab/basic_pentesting_2.ova
+/Volumes/Elements/SIEM SOC (Update Labs)/SIEM SOC (Update Labs)/Full Machine (eset&pfsanse enterprise)/eset&pfsanse enterprise.ova
+
+/Users/mymac/Downloads/iOS Syllabus.pdf
+/Users/mymac/Downloads/ori-3.pdf
+/Users/mymac/Downloads/Practical_Rust_Web_Projects_Building_Cloud_and_Web_Based_Applications.pdf
+
+
+/Volumes/Elements/OS IOS/windows/Win 10 Pro x64.iso
+/Users/mymac/Desktop/untitled folder
+/Users/mymac/Desktop/untitled folder 2
+
+
+
+import fitz
+from pdfminer.high_level import extract_text
+import pdfplumber
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.pdfpage import PDFPage
+from pdfminer.high_level import extract_text
+import re
+import requests
+import requests
+import whois
+
+# api key to hybrid analysis 
+
+API_KEY = 'yvtl3enod5f6cf1bu7b0jdmm47309335hzhtsqsrc85756f94sxvhltsf3427177'
+
+# get the input form the user 
+print("Please input the path to the PDF file: ")
+PDF = input()
+
+
+# extract the content from the file 
+def extract_text_from_pdf(file_path):
+    text = extract_text(file_path)
+    return text
+
+#get the nuber of line from the file 
+def count_lines_in_pdf(file_path):
+    try:
+        pdf_document = fitz.open(file_path)
+        line_count = 0
+        for page_num in range(len(pdf_document)):
+            page = pdf_document.load_page(page_num)
+            text = page.get_text()
+            line_count += text.count('\n')
+        pdf_document.close()
+        return line_count
+    except FileNotFoundError:
+        print(f"The file '{file_path}' does not exist.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+# get the meta data from the pdf.
+
+def get_pdf_metadata(file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            parser = PDFParser(file)
+            document = PDFDocument(parser)
+            metadata = document.info[0]
+            return metadata
+    except FileNotFoundError:
+        print(f"The file '{file_path}' does not exist.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# check if the pdf contin url a get them out
+
+def extract_urls_from_pdf(file_path):
+    urls = []
+    try:
+        text = extract_text(file_path)
+        # Regex pattern for extracting URLs
+        urls = re.findall(r'http[s]?://\S+', text)
+    except FileNotFoundError:
+        print(f"The file '{file_path}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    return urls
+
+
+# get info about the URL in the pdf 
+def check_url_status(url):
+    try:
+        response = requests.get(url)
+        status_code = response.status_code
+        if status_code == 200:
+            return "URL is reachable and returned status 200 OK"
+        else:
+            return f"URL returned status code: {status_code}"
+    except requests.RequestException as e:
+        return f"An error occurred: {e}"
+
+def whois_lookup(domain):
+    try:
+        domain_info = whois.whois(domain)
+        return domain_info
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+def is_valid_url(url):
+    """Simple URL validation"""
+    import re
+    pattern = re.compile(r'http[s]?://\S+')
+    return pattern.match(url) is not None
+
+
+
+
+# assoit info 
+
+text = extract_text_from_pdf(PDF)
+line_count = count_lines_in_pdf(PDF)
+metadata = get_pdf_metadata(PDF)
+urls = extract_urls_from_pdf(PDF)
+
+# check on the url and doamin 
+
+URL_To_cheack = urls
+
+def check_url_hybrid_analysis(url):
+    headers = {
+        'Authorization': f'Bearer {API_KEY}'
+    }
+    params = {
+        'url': url
+    }
+    response = requests.post('https://api.hybrid-analysis.com/v2/url/scan', headers=headers, data=params)
+    
+    if response.status_code == 200:
+        result = response.json()
+        # The result includes various details, including report IDs and status
+        return result
+    else:
+        return f"Error: {response.status_code}, {response.text}"
+
+
+# here we get to see the data
+
+# here we see the content of the pdf 
+print(text, line_count)
+
+# the hidden data
+if metadata is not None:
+    for key, value in metadata.items():
+        print(f"{key}: {value}")
+
+for url in urls:
+    if is_valid_url(url):
+        status = check_url_status(url)
+        print(f"Status of {url}: {status}")
+    else:
+        print(f"{url} is not a valid URL")
+
+domain = urls
+domain_info = whois_lookup(domain)
+print(f"WHOIS info for {domain}: {domain_info}")
+
+
+result = check_url_hybrid_analysis(URL_To_cheack)
+print(result)
+
+
+
+
+
+
+
+
+
+
+
+
