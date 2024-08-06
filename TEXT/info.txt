@@ -13,7 +13,7 @@ https://chatgpt.com/share/87a07ab1-1200-4b97-8742-ee009c86c341
 /Volumes/Elements/SIEM SOC (Update Labs)/SIEM SOC (Update Labs)/Full Machine (eset&pfsanse enterprise)/eset&pfsanse enterprise.ova
 
 /Users/mymac/Downloads/iOS Syllabus.pdf
-/Users/mymac/Downloads/ori-3.pdf
+/Users/mymac/Downloads/ori-3pdf.
 /Users/mymac/Downloads/Practical_Rust_Web_Projects_Building_Cloud_and_Web_Based_Applications.pdf
 
 
