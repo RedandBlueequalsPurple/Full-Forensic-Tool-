@@ -2,27 +2,13 @@ import json
 import os
 import csv
 import array as arr
-from configparser import ConfigParser
 from prettytable import PrettyTable
 
 # Define paths
-config_file = 'config.json'
 db_file = 'db.json'
 csv_file_path = 'data.csv'
 array_file_path = 'data.bin'
 config_file_path = 'config.ini'
-
-def load_config():
-    """Load the configuration from a JSON file."""
-    if os.path.isfile(config_file):
-        with open(config_file, 'r') as file:
-            return json.load(file)
-    return {}
-
-def save_config(config):
-    """Save the configuration to a JSON file."""
-    with open(config_file, 'w') as file:
-        json.dump(config, file, indent=4)
 
 def load_db():
     """Load the database from a JSON file."""
@@ -56,9 +42,8 @@ def add_manual_data(config):
         else:
             print("Key cannot be empty.")
             continue
-    save_config(config)
+    save_db(config)
     display_config(config)
-    update_database_with_config(config)
 
 def remove_key_from_config(config):
     """Remove a key from the configuration."""
@@ -73,9 +58,8 @@ def remove_key_from_config(config):
             selected_key = keys[choice - 1]
             if input(f"Do you want to remove the key '{selected_key}' from the configuration? (yes/no): ").strip().lower() == 'yes':
                 del config[selected_key]
-                save_config(config)
+                save_db(config)
                 print(f"Key '{selected_key}' removed from configuration.")
-                update_database_with_config(config)
             else:
                 print("Key not removed from configuration.")
         else:
@@ -109,9 +93,8 @@ def parse_and_add_data_from_json(file_path, config):
             print(f"Value for '{selected_key}': {value}")
             if input(f"Do you want to add the key '{selected_key}' with value '{value}' to the database configuration? (yes/no): ").strip().lower() == 'yes':
                 config[selected_key] = value
-                save_config(config)
+                save_db(config)
                 print(f"Key '{selected_key}' added to configuration with value: {value}")
-                update_database_with_config(config)
             else:
                 print("Key not added to configuration.")
         else:
@@ -119,44 +102,42 @@ def parse_and_add_data_from_json(file_path, config):
     except ValueError:
         print("Invalid input. Please enter a number.")
 
-def update_database_with_config(config):
-    """Update the database file (db.json) based on the current configuration."""
+def format_value(value, max_length=50):
+    """Format the value for better readability in the table."""
+    if isinstance(value, list):
+        formatted_value = ', '.join(str(item) for item in value)
+    elif isinstance(value, dict):
+        formatted_value = json.dumps(value, indent=2)
+    else:
+        formatted_value = str(value)
+    
+    # Truncate if it's too long
+    if len(formatted_value) > max_length:
+        formatted_value = formatted_value[:max_length] + '...'
+    
+    return formatted_value
+
+def display_data():
+    """Display data from the database file."""
     data_store = load_db()
 
-    # Ensure all keys in the config are included in the data_store with their respective values
-    for key, value in config.items():
-        data_store[key] = [value]
+    if data_store:
+        # Create a PrettyTable for displaying data
+        table = PrettyTable()
+        table.field_names = ["Key", "Value"]
+        
+        # Set table column widths
+        table.max_width = {"Key": 60, "Value": 100}
+        
+        # Iterate through each entry in the data store
+        for key, value in data_store.items():
+            formatted_value = format_value(value)
+            table.add_row([key, formatted_value])
+            table.add_row(["-" * 30, "-" * 30])  # Adding a separator line
 
-    # Remove any keys not in the current config
-    keys_to_remove = [key for key in data_store if key not in config]
-    for key in keys_to_remove:
-        del data_store[key]
-
-    save_db(data_store)
-    print("Database updated with the new configuration.")
-
-def display_data_based_on_config():
-    """Display data from the database file based on the current configuration."""
-    while True:
-        if os.path.isfile(db_file):
-            with open(db_file, 'r') as file:
-                data_store = json.load(file)
-
-            # Create a PrettyTable for displaying data
-            table = PrettyTable()
-            table.field_names = ["Key", "Value"]
-
-            for key, value in data_store.items():
-                table.add_row([key, value])
-                table.add_row(["-" * 30, "-" * 30])  # Adding a separator line
-
-            print(table)
-        else:
-            print(f"Database file '{db_file}' not found.")
-
-        choice = input("\nEnter 'return' to go back to the main menu: ").strip().lower()
-        if choice == 'return':
-            break
+        print(table)
+    else:
+        print(f"No data available in '{db_file}'.")
 
 def save_to_csv(data, file_path):
     """Save data to a CSV file."""
@@ -173,6 +154,8 @@ def save_to_csv(data, file_path):
 
 def save_to_config(data, file_path):
     """Save data to an INI config file."""
+    from configparser import ConfigParser
+
     config = ConfigParser()
 
     if isinstance(data, dict):
@@ -223,7 +206,7 @@ def break_json_data(data):
 
 def process_and_save_json_data():
     """Process the JSON file and save detailed information to CSV, INI, and binary array files."""
-    config = load_config()
+    config = load_db()
     if config:
         # Break down the configuration data
         detailed_data = break_json_data(config)
@@ -252,7 +235,7 @@ def process_and_save_json_data():
 
 def main_menu():
     """Display the main menu and handle user choices."""
-    config = load_config()
+    config = load_db()
     while True:
         print("\nMain Menu:")
         print("1. Add data manually")
@@ -267,16 +250,16 @@ def main_menu():
         if choice == '1':
             add_manual_data(config)
         elif choice == '2':
-            json_file_path = input("Enter the JSON file path: ").strip()
+            json_file_path = input("Enter the path to the JSON file: ").strip()
             parse_and_add_data_from_json(json_file_path, config)
         elif choice == '3':
             remove_key_from_config(config)
         elif choice == '4':
-            display_data_based_on_config()
+            display_data()
         elif choice == '5':
             process_and_save_json_data()
         elif choice == '6' or choice.lower() == 'exit':
-            print("Exiting...")
+            print("Exiting program.")
             break
         else:
             print("Invalid choice. Please enter a number between 1 and 6.")
