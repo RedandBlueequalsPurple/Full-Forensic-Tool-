@@ -38,10 +38,34 @@ def copy_config_to_data_store(data_store):
     if os.path.isfile(config_file):
         config_data = load_json(config_file)
         if config_data:
-            data_store.append({'config_data': config_data})
+            for key, value in config_data.items():
+                if key in data_store:
+                    if isinstance(data_store[key], list):
+                        data_store[key].append(value)
+                    else:
+                        data_store[key] = [data_store[key], value]
+                else:
+                    data_store[key] = [value]
             print("Config data copied to data store.")
     else:
         print(f"Config file {config_file} not found.")
+
+def break_json_data(data):
+    """Break down JSON data into smaller parts."""
+    result = {}
+    def flatten_data(d, parent_key=''):
+        if isinstance(d, dict):
+            for k, v in d.items():
+                new_key = f"{parent_key}.{k}" if parent_key else k
+                if isinstance(v, (dict, list)):
+                    flatten_data(v, new_key)
+                else:
+                    result[new_key] = v
+        elif isinstance(d, list):
+            for i, item in enumerate(d):
+                flatten_data(item, f"{parent_key}[{i}]")
+    flatten_data(data)
+    return result
 
 def process_new_files():
     """Process new JSON files and update the data store."""
@@ -55,41 +79,22 @@ def process_new_files():
 
     print(f"Processing new files: {new_files}")
 
-    all_data = []
+    all_data = load_db()
 
     for json_file in new_files:
         file_path = os.path.join(json_directory, json_file)
         data = load_json(file_path)
 
         if data:
-            # Extracting information
-            entry = {
-                'RAMSize': data.get('RAMSize', ''),
-                'VRAMSize': data.get('VRAMSize', ''),
-                'screens': data.get('screens', ''),
-                'file': data.get('file', ''),
-                'fps': data.get('fps', ''),
-                'type': ', '.join(data.get('type', [])),
-                'slot': data.get('slot', ''),
-                'cable': data.get('cable', ''),
-                'driver': data.get('driver', ''),
-                'enabledIn': data.get('enabledIn', ''),
-                'timestamp': data.get('timestamp', ''),
-                'flags': data.get('flags', ''),
-                'PortCount': data.get('PortCount', ''),
-                'useHostIOCache': data.get('useHostIOCache', ''),
-                'Bootable': data.get('Bootable', ''),
-                'IDE0MasterEmulationPort': data.get('IDE0MasterEmulationPort', ''),
-                'IDE0SlaveEmulationPort': data.get('IDE0SlaveEmulationPort', ''),
-                'IDE1MasterEmulationPort': data.get('IDE1MasterEmulationPort', ''),
-                'IDE1SlaveEmulationPort': data.get('IDE1SlaveEmulationPort', ''),
-                'hotpluggable': data.get('hotpluggable', ''),
-                'port': ', '.join(data.get('port', [])),
-                'device': data.get('device', ''),
-                'passthrough': data.get('passthrough', ''),
-                'source_file': json_file
-            }
-            all_data.append(entry)
+            flattened_data = break_json_data(data)
+            for key, value in flattened_data.items():
+                if key in all_data:
+                    if isinstance(all_data[key], list):
+                        all_data[key].append(value)
+                    else:
+                        all_data[key] = [all_data[key], value]
+                else:
+                    all_data[key] = [value]
             print(f"Processed data from file: {json_file}")
 
     # Include data from config.json
@@ -98,6 +103,13 @@ def process_new_files():
     # Save all data to file
     save_data_store(all_data)
     update_processed_files(new_files)
+
+def load_db():
+    """Load the database from a JSON file."""
+    if os.path.isfile(data_store_file):
+        with open(data_store_file, 'r') as file:
+            return json.load(file)
+    return {}
 
 def save_data_store(data):
     """Save the data store to a JSON file."""
