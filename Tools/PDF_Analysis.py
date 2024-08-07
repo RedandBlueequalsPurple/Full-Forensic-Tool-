@@ -25,16 +25,23 @@ API_SECRET = config['api_secret']
 SERVER = config['server']
 
 # Get the input from the user
-print("Please input the path to the PDF file: ")
-PDF = input()
+print("Please input the full path to the PDF file (including file extension): ")
+PDF = input().strip()
 
 # Wait for the user to press Enter to start the process
 input("Press Enter to start the process...")
 
 # Extract the content from the file
 def extract_text_from_pdf(file_path):
-    text = extract_text(file_path)
-    return text
+    try:
+        text = extract_text(file_path)
+        return text
+    except FileNotFoundError:
+        print(f"The file '{file_path}' does not exist.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 # Get the number of lines from the file
 def count_lines_in_pdf(file_path):
@@ -246,7 +253,7 @@ def get_current_datetime():
     return now.strftime('%Y%m%d_%H%M%S')
 
 def main():
-    # Assuming `data` is the data you want to save
+    # Assuming data is the data you want to save
     data = {
         'text': text,
         'line_count': line_count,
