@@ -3,6 +3,7 @@ import os
 import csv
 import array as arr
 from prettytable import PrettyTable
+from configparser import ConfigParser
 
 # Define paths
 db_file = 'db.json'
@@ -116,28 +117,106 @@ def format_value(value, max_length=50):
         formatted_value = formatted_value[:max_length] + '...'
     
     return formatted_value
-
-def display_data():
-    """Display data from the database file."""
+def display_data(filter_key=None):
+    """Display data from the database file, optionally filtered by a key."""
     data_store = load_db()
 
     if data_store:
         # Create a PrettyTable for displaying data
         table = PrettyTable()
-        table.field_names = ["Key", "Value"]
-        
-        # Set table column widths
-        table.max_width = {"Key": 60, "Value": 100}
+        table.field_names = ["ID", "Key", "Value", "Date", "Group"]
         
         # Iterate through each entry in the data store
+        id_counter = 1
         for key, value in data_store.items():
-            formatted_value = format_value(value)
-            table.add_row([key, formatted_value])
-            table.add_row(["-" * 30, "-" * 30])  # Adding a separator line
+            if filter_key is None or filter_key.lower() in key.lower():
+                if isinstance(value, dict):
+                    date = value.get("date", "N/A")
+                    group = value.get("group", "N/A")
+                    formatted_value = format_value(value.get("value", ""))
+                else:
+                    date = "N/A"
+                    group = "N/A"
+                    formatted_value = format_value(value)
+                
+                # Add row to the table
+                table.add_row([id_counter, key, formatted_value, date, group])
+                table.add_row(["-" * 5, "-" * 30, "-" * 60, "-" * 20, "-" * 20])  # Adding a separator line
+                id_counter += 1
 
+        # Print the table
         print(table)
     else:
         print(f"No data available in '{db_file}'.")
+
+def format_value(value, max_length=50):
+    """Format the value for better readability in the table."""
+    if isinstance(value, list):
+        formatted_value = ', '.join(str(item) for item in value)
+    elif isinstance(value, dict):
+        formatted_value = json.dumps(value, indent=2)
+    else:
+        formatted_value = str(value)
+    
+    # Truncate if it's too long
+    if len(formatted_value) > max_length:
+        formatted_value = formatted_value[:max_length] + '...'
+    
+    return formatted_value
+
+
+def format_value(value, max_length=50):
+    """Format the value for better readability in the table."""
+    if isinstance(value, list):
+        formatted_value = ', '.join(str(item) for item in value)
+    elif isinstance(value, dict):
+        formatted_value = json.dumps(value, indent=2)
+    else:
+        formatted_value = str(value)
+    
+    # Truncate if it's too long
+    if len(formatted_value) > max_length:
+        formatted_value = formatted_value[:max_length] + '...'
+    
+    return formatted_value
+
+def assign_keys_to_group(config):
+    """Assign a group to all keys that contain a specified keyword."""
+    if not config:
+        print("No configuration data available.")
+        return
+
+    # Get the keyword to search for
+    keyword = input("Enter the keyword or pattern to match keys: ").strip()
+    if not keyword:
+        print("Keyword cannot be empty.")
+        return
+
+    # Get the group name to assign
+    group = input("Enter the group name to assign to matching keys: ").strip()
+    if not group:
+        print("Group name cannot be empty.")
+        return
+
+    # Track if any keys were updated
+    updated = False
+
+    # Iterate through the keys and update the group if the keyword is in the key name
+    for key in list(config.keys()):
+        if keyword.lower() in key.lower():
+            if isinstance(config[key], dict):
+                config[key]['group'] = group
+            else:
+                # Retain the existing value and add the group
+                config[key] = {'value': config[key], 'group': group}
+            updated = True
+
+    if updated:
+        save_db(config)
+        print(f"All keys containing '{keyword}' have been assigned to group '{group}'.")
+    else:
+        print(f"No keys containing '{keyword}' were found.")
+
 
 def save_to_csv(data, file_path):
     """Save data to a CSV file."""
@@ -154,8 +233,6 @@ def save_to_csv(data, file_path):
 
 def save_to_config(data, file_path):
     """Save data to an INI config file."""
-    from configparser import ConfigParser
-
     config = ConfigParser()
 
     if isinstance(data, dict):
@@ -242,8 +319,9 @@ def main_menu():
         print("2. Parse and add data from JSON file")
         print("3. Remove key from configuration")
         print("4. Display data based on configuration")
-        print("5. Process and save JSON data")
-        print("6. Exit")
+        print("5. Assign keys to group")
+        print("6. Process and save JSON data")
+        print("7. Exit")
 
         choice = input("Enter your choice (or type 'exit' to quit): ").strip()
 
@@ -257,12 +335,14 @@ def main_menu():
         elif choice == '4':
             display_data()
         elif choice == '5':
+            assign_keys_to_group(config)
+        elif choice == '6':
             process_and_save_json_data()
-        elif choice == '6' or choice.lower() == 'exit':
+        elif choice == '7' or choice.lower() == 'exit':
             print("Exiting program.")
             break
         else:
-            print("Invalid choice. Please enter a number between 1 and 6.")
+            print("Invalid choice. Please enter a number between 1 and 7.")
 
 if __name__ == "__main__":
     main_menu()
