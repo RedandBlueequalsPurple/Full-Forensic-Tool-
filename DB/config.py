@@ -1,5 +1,6 @@
 import json
 import os
+import cmd
 import csv
 import array as arr
 from prettytable import PrettyTable
@@ -117,6 +118,7 @@ def format_value(value, max_length=50):
         formatted_value = formatted_value[:max_length] + '...'
     
     return formatted_value
+
 def display_data(filter_key=None):
     """Display data from the database file, optionally filtered by a key."""
     data_store = load_db()
@@ -148,37 +150,6 @@ def display_data(filter_key=None):
         print(table)
     else:
         print(f"No data available in '{db_file}'.")
-
-def format_value(value, max_length=50):
-    """Format the value for better readability in the table."""
-    if isinstance(value, list):
-        formatted_value = ', '.join(str(item) for item in value)
-    elif isinstance(value, dict):
-        formatted_value = json.dumps(value, indent=2)
-    else:
-        formatted_value = str(value)
-    
-    # Truncate if it's too long
-    if len(formatted_value) > max_length:
-        formatted_value = formatted_value[:max_length] + '...'
-    
-    return formatted_value
-
-
-def format_value(value, max_length=50):
-    """Format the value for better readability in the table."""
-    if isinstance(value, list):
-        formatted_value = ', '.join(str(item) for item in value)
-    elif isinstance(value, dict):
-        formatted_value = json.dumps(value, indent=2)
-    else:
-        formatted_value = str(value)
-    
-    # Truncate if it's too long
-    if len(formatted_value) > max_length:
-        formatted_value = formatted_value[:max_length] + '...'
-    
-    return formatted_value
 
 def assign_keys_to_group(config):
     """Assign a group to all keys that contain a specified keyword."""
@@ -216,7 +187,6 @@ def assign_keys_to_group(config):
         print(f"All keys containing '{keyword}' have been assigned to group '{group}'.")
     else:
         print(f"No keys containing '{keyword}' were found.")
-
 
 def save_to_csv(data, file_path):
     """Save data to a CSV file."""
@@ -281,68 +251,96 @@ def break_json_data(data):
     flatten_data(data)
     return result
 
-def process_and_save_json_data():
-    """Process the JSON file and save detailed information to CSV, INI, and binary array files."""
-    config = load_db()
-    if config:
-        # Break down the configuration data
-        detailed_data = break_json_data(config)
-        print("\nDetailed JSON data:")
-        for idx, key in enumerate(detailed_data.keys(), 1):
-            print(f"{idx}. {key}")
+def process_and_load_data():
+    """Process and load data from JSON, CSV, INI, and binary files."""
+    # Read JSON data
+    if os.path.isfile(db_file):
+        with open(db_file, 'r') as file:
+            json_data = json.load(file)
+        print(f"JSON data loaded from {db_file}")
 
-        try:
-            choice = int(input("\nChoose a key to display its value (enter number): ").strip())
-            selected_key = list(detailed_data.keys())[choice - 1]
-            print(f"Selected key: {selected_key}")
-            print(f"Value for '{selected_key}': {detailed_data[selected_key]}")
+    # Read CSV data
+    if os.path.isfile(csv_file_path):
+        with open(csv_file_path, 'r') as file:
+            csv_reader = csv.DictReader(file)
+            csv_data = [row for row in csv_reader]
+        print(f"CSV data loaded from {csv_file_path}")
 
-            save_choice = input(f"Do you want to save the key '{selected_key}' with its value to CSV, INI, and binary array files? (yes/no): ").strip().lower()
-            if save_choice == 'yes':
-                save_to_csv([{selected_key: detailed_data[selected_key]}], csv_file_path)
-                save_to_config({selected_key: detailed_data[selected_key]}, config_file_path)
-                save_to_array({selected_key: detailed_data[selected_key]}, array_file_path)
-                print("Data saved successfully.")
-            else:
-                print("Data not saved.")
-        except (IndexError, ValueError):
-            print("Invalid choice. Please enter a valid number.")
-    else:
-        print("No configuration data to process.")
+    # Read INI data
+    config = ConfigParser()
+    if os.path.isfile(config_file_path):
+        config.read(config_file_path)
+        print(f"INI configuration loaded from {config_file_path}")
 
-def main_menu():
-    """Display the main menu and handle user choices."""
-    config = load_db()
-    while True:
-        print("\nMain Menu:")
-        print("1. Add data manually")
-        print("2. Parse and add data from JSON file")
-        print("3. Remove key from configuration")
-        print("4. Display data based on configuration")
-        print("5. Assign keys to group")
-        print("6. Process and save JSON data")
-        print("7. Exit")
+    # Read binary array data
+    if os.path.isfile(array_file_path):
+        with open(array_file_path, 'rb') as file:
+            byte_array = arr.array('B')
+            byte_array.fromfile(file, os.path.getsize(array_file_path))
+            array_data = json.loads(byte_array.tobytes().decode())
+        print(f"Binary array data loaded from {array_file_path}")
 
-        choice = input("Enter your choice (or type 'exit' to quit): ").strip()
+def process_data():
+    """Process data by calling different save methods."""
+    data_store = load_db()
+    save_to_csv(data_store, csv_file_path)
+    save_to_config(data_store, config_file_path)
+    save_to_array(data_store, array_file_path)
 
-        if choice == '1':
-            add_manual_data(config)
-        elif choice == '2':
-            json_file_path = input("Enter the path to the JSON file: ").strip()
-            parse_and_add_data_from_json(json_file_path, config)
-        elif choice == '3':
-            remove_key_from_config(config)
-        elif choice == '4':
-            display_data()
-        elif choice == '5':
-            assign_keys_to_group(config)
-        elif choice == '6':
-            process_and_save_json_data()
-        elif choice == '7' or choice.lower() == 'exit':
-            print("Exiting program.")
-            break
-        else:
-            print("Invalid choice. Please enter a number between 1 and 7.")
+class DBCLI(cmd.Cmd):
+    """Command-line interface for managing the database."""
+    intro = "Welcome to the Database CLI. Type help or ? to list commands.\n"
+    prompt = "(Config-cli) "
 
-if __name__ == "__main__":
-    main_menu()
+    def __init__(self):
+        super().__init__()
+        self.config = load_db()
+        self.process_and_load_data()
+
+    def process_and_load_data(self):
+        """Process and load data from various files."""
+        process_and_load_data()
+
+    def do_add(self, line):
+        """Add data manually to the configuration."""
+        add_manual_data(self.config)
+
+    def do_remove(self, line):
+        """Remove a key from the configuration."""
+        remove_key_from_config(self.config)
+
+    def do_parse_json(self, line):
+        """Parse and add data from a JSON file to the configuration."""
+        parse_and_add_data_from_json(line, self.config)
+
+    def do_display(self, line):
+        """Display data from the database, optionally filtered by a key."""
+        display_data(line)
+
+    def do_group(self, line):
+        """Assign a group to keys containing a specified keyword."""
+        assign_keys_to_group(self.config)
+
+    def do_process(self, line):
+        """Process data and save to various files."""
+        process_data()
+
+    def do_exit(self, line):
+        """Exit the CLI."""
+        print("Exiting CLI.")
+        return True
+
+    def do_help(self, line):
+        """Display help information."""
+        print("\nDocumented commands (type help <topic>):")
+        print("========================================")
+        print("add           Add data manually to the configuration")
+        print("remove        Remove a key from the configuration")
+        print("parse_json    Parse and add data from a JSON file to the configuration")
+        print("display       Display data from the database, optionally filtered by a key")
+        print("group         Assign a group to keys containing a specified keyword")
+        print("process       Process data and save to various files")
+        print("exit          Exit the CLI")
+
+if __name__ == '__main__':
+    DBCLI().cmdloop()

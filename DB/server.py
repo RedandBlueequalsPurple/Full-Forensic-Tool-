@@ -1,10 +1,11 @@
 import json
 import os
+import cmd
 
 # Define directories and files
 json_directory = 'JSON'
 processed_files_path = 'processed_files.txt'
-data_store_file = 'db.json'  # Changed from 'data_store.json' to 'db.json'
+data_store_file = 'db.json'
 config_file = 'config.json'
 
 # Ensure the directories exist
@@ -116,5 +117,42 @@ def save_data_store(data):
     with open(data_store_file, 'w') as file:
         json.dump(data, file, indent=4)
 
-if __name__ == "__main__":
-    process_new_files()
+class DBCLI(cmd.Cmd):
+    prompt = '(Server-cli) '
+    
+    def do_process(self, arg):
+        """Process new JSON files and update the data store."""
+        process_new_files()
+
+    def do_load_db(self, arg):
+        """Load the database from the JSON file."""
+        data = load_db()
+        print("Database loaded:")
+        print(json.dumps(data, indent=4))
+
+    def do_save_db(self, arg):
+        """Save the current data to the database file."""
+        data = load_db()  # Assuming we want to save current data
+        save_data_store(data)
+        print("Data saved to database file.")
+
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        print("Exiting...")
+        return True
+
+    def do_help(self, arg):
+        """Show help information."""
+        if arg:
+            cmd.Cmd.do_help(self, arg)
+        else:
+            print("\nDocumented commands (type help <topic>):")
+            print("========================================")
+            print("process       Process new JSON files and update the data store")
+            print("load_db       Load the database from the JSON file")
+            print("save_db       Save the current data to the database file")
+            print("exit          Exit the CLI")
+            print("help          Show this help message")
+
+if __name__ == '__main__':
+    DBCLI().cmdloop()

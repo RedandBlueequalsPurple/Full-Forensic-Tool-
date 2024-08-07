@@ -2,6 +2,7 @@ import json
 import os
 from prettytable import PrettyTable
 from datetime import datetime
+import cmd
 
 # Define the path to the database file
 db_file = 'db.json'
@@ -48,9 +49,9 @@ def display_data(filter_key=None, filter_group=None):
         table.max_width["Value"] = 60
         table.max_width["Date"] = 20
         table.max_width["Group"] = 20
-        table.max_width["VS checked"] = 30 
+        table.max_width["VS checked"] = 30
         
-        # Iterate through each entry in the data store
+        # Add the actual data rows
         id_counter = 1
         for key, value in data_store.items():
             if (filter_key is None or filter_key.lower() in key.lower()) and \
@@ -67,12 +68,17 @@ def display_data(filter_key=None, filter_group=None):
                 vs_checked = "N/A"  # Placeholder value for the "VS checked" column
                 
                 table.add_row([id_counter, key, formatted_value, date, group, vs_checked])
-                table.add_row(["-" * 5, "-" * 30, "-" * 60, "-" * 20, "-" * 20, "-" * 30])  # Adding a separator line
+                
+                # Add a separator row after each data row
+                separator_row = ['-'*len(field) for field in table.field_names]
+                table.add_row(separator_row)
+                
                 id_counter += 1
 
         print(table)
     else:
         print(f"No data available in '{db_file}'.")
+
 
 def show_groups():
     """Display all unique groups in the data store."""
@@ -90,33 +96,48 @@ def show_groups():
     else:
         print("No groups available.")
 
-def main_loop():
-    """Main command loop for displaying and filtering data."""
-    while True:
-        print("\nAvailable Commands:")
-        print("1. Display all data")
-        print("2. Filter data by key")
-        print("3. Filter data by group")
-        print("4. Exit")
+class DBCLI(cmd.Cmd):
+    prompt = '(User-cli) '
+    
+    def do_display(self, arg):
+        """Display all data."""
+        display_data()
 
-        choice = input("Enter your choice (1/2/3/4): ").strip()
-
-        if choice == '1':
-            display_data()
-        elif choice == '2':
-            key_filter = input("Enter the key to filter by: ").strip()
+    def do_filter_key(self, arg):
+        """Filter data by key."""
+        key_filter = input("Enter key to filter by: ").strip()
+        if key_filter:
             display_data(filter_key=key_filter)
-        elif choice == '3':
-            group_filter = input("Enter the group to filter by (or type 'show groups' to list all groups): ").strip()
-            if group_filter.lower() == 'show groups':
-                show_groups()
-            else:
-                display_data(filter_group=group_filter)
-        elif choice == '4' or choice.lower() == 'exit':
-            print("Exiting...")
-            break
         else:
-            print("Invalid choice. Please enter 1, 2, 3, or 4.")
+            print("Please provide a key to filter by.")
 
-if __name__ == "__main__":
-    main_loop()
+    def do_filter_group(self, arg):
+        """Filter data by group."""
+        group_filter = input("Enter group to filter by (or type 'show groups'): ").strip()
+        if group_filter.lower() == 'show groups':
+            show_groups()
+        elif group_filter:
+            display_data(filter_group=group_filter)
+        else:
+            print("Please provide a group to filter by.")
+
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        print("Exiting...")
+        return True
+
+    def do_help(self, arg):
+        """Show help information."""
+        if arg:
+            cmd.Cmd.do_help(self, arg)
+        else:
+            print("\nDocumented commands (type help <topic>):")
+            print("========================================")
+            print("display       Display all data")
+            print("filter_key    Filter data by key")
+            print("filter_group  Filter data by group")
+            print("exit          Exit the CLI")
+            print("help          Show this help message")
+
+if __name__ == '__main__':
+    DBCLI().cmdloop()

@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import os
+import cmd
 
 # Define the directory containing the script files relative to the current script's location
 script_dir = os.path.join(os.path.dirname(__file__))
@@ -23,31 +24,49 @@ def run_server():
     server_path = os.path.join(script_dir, 'server.py')
     subprocess.run([sys.executable, server_path])
 
-def display_menu():
-    """Display the main menu."""
-    print("\nMain Menu:")
-    print("1. Run config script")
-    print("2. Run user script")
-    print("3. Run server script")
-    print("4. Exit")
+def run_vs():
+    """Run the VS script."""
+    print("Running VS script...")
+    vs_path = os.path.join(script_dir, 'VS.py')
+    subprocess.run([sys.executable, vs_path])
 
-def main():
-    """Main function to handle user choices."""
-    while True:
-        display_menu()
-        choice = input("Enter your choice (1-4): ").strip()
+class DBCLI(cmd.Cmd):
+    prompt = '(DB-cli) '
+    
+    def do_config(self, arg):
+        """Run the config script."""
+        run_config()
 
-        if choice == '1':
-            run_config()
-        elif choice == '2':
-            run_user()
-        elif choice == '3':
-            run_server()
-        elif choice == '4':
-            print("Exiting...")
-            break
+    def do_user(self, arg):
+        """Run the user script."""
+        run_user()
+
+    def do_server(self, arg):
+        """Run the server script."""
+        run_server()
+
+    def do_vs(self, arg):
+        """Run the VS script."""
+        run_vs()
+
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        print("Exiting...")
+        return True
+
+    def do_help(self, arg):
+        """Show help information."""
+        if arg:
+            cmd.Cmd.do_help(self, arg)
         else:
-            print("Invalid choice. Please select 1, 2, 3, or 4.")
+            print("\nDocumented commands (type help <topic>):")
+            print("========================================")
+            print("config   Run the config script")
+            print("user     Run the user script")
+            print("server   Run the server script")
+            print("vs       Run the VS script")
+            print("exit     Exit the CLI")
+            print("help     Show this help message")
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    DBCLI().cmdloop()
