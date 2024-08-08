@@ -1,12 +1,9 @@
 import sys
 import os
+import json
 from email.parser import BytesParser
 from email import policy
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QDesktopWidget, QFileDialog
-
-class SecureApplication(QApplication):
-    def applicationSupportsSecureRestorableState(self):
-        return True
+from datetime import datetime
 
 def read_eml_file(file_path):
     try:
@@ -15,9 +12,9 @@ def read_eml_file(file_path):
             msg = BytesParser(policy=policy.default).parse(eml_file)
             
             # Extract headers
-            headers_text = ""
+            headers_text = {}
             for header_name, header_value in msg.items():
-                headers_text += f"{header_name}: {header_value}\n"
+                headers_text[header_name] = header_value
 
             # Extract body
             body_text = ""
@@ -32,73 +29,47 @@ def read_eml_file(file_path):
             return headers_text, body_text
 
     except FileNotFoundError:
-        return "File not found.", ""
+        return {}, "File not found."
     except Exception as e:
-        return "An error occurred: " + str(e), ""
+        return {"error": str(e)}, ""
 
-def show_popup(file_path):
-    app = SecureApplication(sys.argv)
-    popup = QWidget()
-    popup.setWindowTitle("EML File Viewer")
+def export_to_json(headers_text, body_text, file_name_prefix):
+    try:
+        # Ensure the 'json' directory exists
+        os.makedirs('json', exist_ok=True)
+        
+        # Generate a filename with the current date
+        current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = f"{file_name_prefix}_{current_date}.json"
+        file_path = os.path.join('json', file_name)
 
-    layout = QVBoxLayout()
+        # Prepare data for JSON
+        data = {
+            "headers": headers_text,
+            "body": body_text
+        }
 
-    headers_label = QLabel()
-    body_label = QLabel()
-
-    headers_text, body_text = read_eml_file(file_path)
-
-    headers_label.setText(headers_text)
-    body_label.setText(body_text)
-
-    headers_label.setWordWrap(True)
-    body_label.setWordWrap(True)
-
-    layout.addWidget(QLabel("Headers:"))
-    layout.addWidget(headers_label)
-    layout.addWidget(QLabel("Message Body:"))
-    layout.addWidget(body_label)
-
-    # Export button
-    def export_data():
-        try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            txt_file_path, _ = QFileDialog.getSaveFileName(popup, "Save TXT", "", "Text Files (*.txt)", options=options)
-            if txt_file_path:
-                with open(txt_file_path, 'w', encoding='utf-8') as f:
-                    f.write(headers_text)
-                    f.write("\n\n")
-                    f.write(body_text)
-                print("Data exported to TXT successfully!")
-        except Exception as e:
-            print("An error occurred while exporting data:", str(e))
-
-    export_button = QPushButton("Export to TXT")
-    export_button.clicked.connect(export_data)
-    layout.addWidget(export_button)
-
-    # Close button
-    close_button = QPushButton("Close")
-    close_button.clicked.connect(popup.close)
-    layout.addWidget(close_button)
-
-    popup.setLayout(layout)
-
-    # Set window size based on screen size
-    screen = QDesktopWidget().screenGeometry()
-    popup_width = screen.width() * 0.5  # Adjust window width to be 50% of screen width
-    popup_height = screen.height() * 0.5  # Adjust window height to be 50% of screen height
-    popup.setGeometry(screen.width() * 0.25, screen.height() * 0.25, popup_width, popup_height)  # Place window at 25% from the left and top of the screen
-
-    popup.show()
-    sys.exit(app.exec_())
+        # Save the file
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        print(f"Data exported to {file_path} successfully!")
+    except Exception as e:
+        print("An error occurred while exporting data:", str(e))
 
 def main():
     file_path = input("Enter the file path: ")
     file_path = os.path.join(os.getcwd(), file_path)  # Construct absolute path
     if os.path.isfile(file_path):
-        show_popup(file_path)
+        headers_text, body_text = read_eml_file(file_path)
+        print("\nHeaders:\n")
+        print(headers_text)
+        print("\nMessage Body:\n")
+        print(body_text)
+        
+        # Use the filename without the extension for the prefix
+        file_name_prefix = os.path.splitext(os.path.basename(file_path))[0]
+        export_to_json(headers_text, body_text, file_name_prefix)
     else:
         print("File not found.")
 
