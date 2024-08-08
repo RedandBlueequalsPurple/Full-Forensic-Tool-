@@ -26,12 +26,12 @@ def read_eml_file(file_path):
             else:
                 body_text += msg.get_payload(decode=True).decode(msg.get_content_charset()) + "\n"
 
-            return headers_text, body_text
+            return msg, headers_text, body_text
 
     except FileNotFoundError:
-        return {}, "File not found."
+        return None, {}, "File not found."
     except Exception as e:
-        return {"error": str(e)}, ""
+        return None, {"error": str(e)}, ""
 
 def export_to_json(headers_text, body_text, file_name_prefix):
     try:
@@ -57,19 +57,41 @@ def export_to_json(headers_text, body_text, file_name_prefix):
     except Exception as e:
         print("An error occurred while exporting data:", str(e))
 
+def save_attachments(msg, output_dir):
+    try:
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        for part in msg.iter_attachments():
+            filename = part.get_filename()
+            if filename:
+                print(f"Found attachment: {filename}")
+                filepath = os.path.join(output_dir, filename)
+                with open(filepath, 'wb') as f:
+                    f.write(part.get_payload(decode=True))
+    except Exception as e:
+        print("An error occurred while saving attachments:", str(e))
+
 def main():
     file_path = input("Enter the file path: ")
     file_path = os.path.join(os.getcwd(), file_path)  # Construct absolute path
     if os.path.isfile(file_path):
-        headers_text, body_text = read_eml_file(file_path)
-        print("\nHeaders:\n")
-        print(headers_text)
-        print("\nMessage Body:\n")
-        print(body_text)
-        
-        # Use the filename without the extension for the prefix
-        file_name_prefix = os.path.splitext(os.path.basename(file_path))[0]
-        export_to_json(headers_text, body_text, file_name_prefix)
+        msg, headers_text, body_text = read_eml_file(file_path)
+        if msg:
+            print("\nHeaders:\n")
+            print(headers_text)
+            print("\nMessage Body:\n")
+            print(body_text)
+            
+            # Use the filename without the extension for the prefix
+            file_name_prefix = os.path.splitext(os.path.basename(file_path))[0]
+            export_to_json(headers_text, body_text, file_name_prefix)
+
+            # Define output directory for attachments
+            output_dir = 'attachments'
+            save_attachments(msg, output_dir)
+        else:
+            print("Failed to read the email file.")
     else:
         print("File not found.")
 
