@@ -1,0 +1,19 @@
+note on the pdf analysis tool 
+
+
+
+date: 06/08/2024
+
+
+main problem:
+
+
+1.the libery named "urllib3" work with OpenSSL 1.1.1, and it is not the latset model when the model LibreSSL work with OpenSSL 2.8.3
+2.when i give the file path it stop working and exit 
+
+
+result of the QA : FAIL 
+
+
+
+Sultion: rebuild the code from the start!

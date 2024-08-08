@@ -7,13 +7,13 @@ This tool is the first big project that i make.
 
 This kit of tools have analysis of :
 
-1. ISO
-2. OVA
-3. PDF
-4. EMAIL
-5. JSON
-6. URL
-
+1. EMAIL
+2. PDF
+3. ISO
+4. OVA
+5. URL
+6. JSON
+7. DB
 
 
 

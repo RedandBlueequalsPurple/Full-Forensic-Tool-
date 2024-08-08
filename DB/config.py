@@ -311,7 +311,11 @@ class DBCLI(cmd.Cmd):
 
     def do_parse_json(self, line):
         """Parse and add data from a JSON file to the configuration."""
-        parse_and_add_data_from_json(line, self.config)
+        file_path = input("Enter the path to the JSON file: ").strip()
+        if not file_path:
+            print("File path cannot be empty.")
+            return
+        parse_and_add_data_from_json(file_path, self.config)
 
     def do_display(self, line):
         """Display data from the database, optionally filtered by a key."""
