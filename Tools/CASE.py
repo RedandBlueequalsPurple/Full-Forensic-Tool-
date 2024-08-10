@@ -40,9 +40,9 @@ def main():
                   "Please note that all your actions will be logged in this program and will be added to the report.\n\n"
                   "Evidence in the form of log events will be recorded for everything you do during the investigation.\n\n")
 
-        def do_start(self, arg):
-            """Start the CASE sanction process"""
-            print("Starting the CASE sanction process...")
+        def do_new(self, arg):
+            """Create a new case"""
+            print("Creating a new case...")
             run_New_Case()  # Invoke the New_Case script
 
         def do_load(self, arg):
@@ -61,7 +61,7 @@ def main():
                 cmd.Cmd.do_help(self, arg)
             else:
                 print("Available commands:\n"
-                      "  start  - Start the CASE sanction process\n"
+                      "  new    - Create a new case\n"
                       "  load   - Load an existing case\n"
                       "  exit   - Exit the CASE sanction system\n"
                       "  help   - Show this help message\n")
