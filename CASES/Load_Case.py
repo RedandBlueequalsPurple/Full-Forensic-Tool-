@@ -157,9 +157,14 @@ class CaseFileCLI(cmd.Cmd):
             module_path = os.path.join("Tools" if choice != 7 else "DB", f"{tool_name}.py")
             module = self.import_module_from_path(tool_name, module_path)
             if module:
-                module.main()
-                if self.log_file:
-                    logging.info(f"Executed tool: {tool_name}")
+                if hasattr(module, 'main'):
+                    module.main()
+                    if self.log_file:
+                        logging.info(f"Executed tool: {tool_name}")
+                else:
+                    print(f"Module {tool_name} does not have a 'main' function.")
+                    if self.log_file:
+                        logging.error(f"Module {tool_name} does not have a 'main' function.")
         else:
             print("An error occurred: Tool not found.")
             if self.log_file:
@@ -171,6 +176,7 @@ class CaseFileCLI(cmd.Cmd):
         module = importlib.util.module_from_spec(spec)
         try:
             spec.loader.exec_module(module)
+            print(f"Imported module {module_name}: {module.__dict__}")
             return module
         except Exception as e:
             print(f"An error occurred while importing the module: {e}")
@@ -244,22 +250,11 @@ class CaseFileCLI(cmd.Cmd):
             if line in commands:
                 print(f"{line}: {commands[line]}")
             else:
-                print(f"No help available for {line}.")
+                print(f"No help available for command: {line}")
         else:
-            print("Documented commands (type help <topic>):")
-            print("========================================\n")
-            for cmd in commands:
-                print(f"{cmd:<12} - {commands[cmd]}\n")
-
-    def format_case_number(self, case_number):
-        """
-        Format the case number to include the 'case' prefix.
-        """
-        return f"Case {case_number}"
+            for cmd, desc in commands.items():
+                print(f"{cmd}: {desc}")
 
 if __name__ == '__main__':
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(base_dir, 'your_file.txt')
-
-    cli = CaseFileCLI(file_path)
+    cli = CaseFileCLI(file_path="your_initial_file_path_here.txt")
     cli.cmdloop()
