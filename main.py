@@ -56,7 +56,7 @@ while True:
     elif Choice == "7":
         print("DB was selected")
         import DB.main_DB as main_DB
-        main_DB.main()
+        main_DB.DBCLI().cmdloop()  # This will start the CLI for the DB tool
         break
     elif Choice == "8":
         print("PNG Analysis was selected")
