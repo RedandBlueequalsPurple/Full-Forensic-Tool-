@@ -2,6 +2,7 @@ import cmd
 import os
 from datetime import datetime
 import importlib.util
+import logging
 
 class CaseFileCLI(cmd.Cmd):
     prompt = 'casefile> '
@@ -11,11 +12,36 @@ class CaseFileCLI(cmd.Cmd):
         self.file_path = file_path
         self.ensure_archive_cases_folder()
         self.current_case_number = None
+        self.log_file = None
+        self.current_tool_choice = None
+
+        # Set up logging
+        self.setup_logging()
 
     def ensure_archive_cases_folder(self):
         folder_name = "archive cases"
         if not os.path.isdir(folder_name):
             os.makedirs(folder_name)
+
+    def setup_logging(self):
+        """Set up logging for the CLI."""
+        if self.current_case_number:
+            # Determine log file location based on the current case
+            case_file_name = f"case {self.current_case_number}.txt"
+            case_file_path = os.path.join("archive cases", case_file_name)
+            
+            # Ensure the case file exists before setting up logging
+            if os.path.exists(case_file_path):
+                self.log_file = case_file_path
+            else:
+                print(f"Case file {case_file_name} does not exist. Logging will not be set up.")
+                self.log_file = None
+        else:
+            self.log_file = None
+
+        if self.log_file:
+            logging.basicConfig(filename=self.log_file, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+            logging.info('CaseFileCLI initialized.')
 
     def list_files_in_archive_cases(self):
         """List all files in the 'archive cases' folder."""
@@ -53,13 +79,33 @@ class CaseFileCLI(cmd.Cmd):
                 self.current_case_number = case_number
                 self.prompt = f"case {case_number}> "
                 
+                # Re-setup logging to use the case-specific file
+                self.setup_logging()
+                
+                # Log the case load event
+                if self.log_file:
+                    logging.info(f"Loaded case file: {case_file_name}")
+                
                 # Tool selection menu
                 self.show_tool_menu()
                 
             except Exception as e:
                 print(f"An error occurred while reading the file: {e}")
+                if self.log_file:
+                    logging.error(f"Error reading file {case_file_name}: {e}")
         else:
             print(f"The case file '{case_file_name}' does not exist in 'archive cases'.")
+
+    def do_select_tool(self, line):
+        """
+        Select a tool to execute.
+        Usage: select_tool
+        """
+        if not self.current_case_number:
+            print("No case is currently loaded.")
+            return
+
+        self.show_tool_menu()
 
     def show_tool_menu(self):
         """Display tool selection menu and handle user choice."""
@@ -77,12 +123,17 @@ class CaseFileCLI(cmd.Cmd):
 
             if choice == 'exit':
                 print("Bye!")
+                if self.log_file:
+                    logging.info("Exiting CLI.")
                 break
             elif choice in [str(tool[0]) for tool in list_of_tools]:
-                self.handle_tool_choice(int(choice))
+                self.current_tool_choice = int(choice)
+                self.handle_tool_choice(self.current_tool_choice)
                 break
             else:
                 print("Invalid choice. Please select a valid tool.")
+                if self.log_file:
+                    logging.warning(f"Invalid tool choice: {choice}")
 
     def handle_tool_choice(self, choice):
         """Handle the tool choice and execute the corresponding module."""
@@ -107,8 +158,12 @@ class CaseFileCLI(cmd.Cmd):
             module = self.import_module_from_path(tool_name, module_path)
             if module:
                 module.main()
+                if self.log_file:
+                    logging.info(f"Executed tool: {tool_name}")
         else:
             print("An error occurred: Tool not found.")
+            if self.log_file:
+                logging.error(f"Tool not found for choice: {choice}")
 
     def import_module_from_path(self, module_name, module_path):
         """Import a module from a specific path."""
@@ -119,6 +174,8 @@ class CaseFileCLI(cmd.Cmd):
             return module
         except Exception as e:
             print(f"An error occurred while importing the module: {e}")
+            if self.log_file:
+                logging.error(f"Error importing module {module_name}: {e}")
             return None
 
     def do_note(self, line):
@@ -149,11 +206,15 @@ class CaseFileCLI(cmd.Cmd):
                 with open(case_file_path, 'a') as file:
                     file.write(f"\n\nNote Added on {note_date}\nInvestigator: {investigator}\nNote: {note}")
                 print(f"Note added to {case_file_path} successfully.")
+                if self.log_file:
+                    logging.info(f"Note added to case file {case_file_name} by {investigator}.")
             else:
                 print(f"The case file '{case_file_name}' does not exist in 'archive cases'.")
         
         except Exception as e:
             print(f"An error occurred: {e}")
+            if self.log_file:
+                logging.error(f"Error adding note to case file {case_file_name}: {e}")
 
     def do_list_cases(self, line):
         """
@@ -165,12 +226,15 @@ class CaseFileCLI(cmd.Cmd):
     def do_exit(self, line):
         """Exit the CLI."""
         print("Exiting CLI.")
+        if self.log_file:
+            logging.info("CLI exited.")
         return True
 
     def do_help(self, line):
         """Display help information for available commands."""
         commands = {
             'load': 'Load the case file with the specified case number.',
+            'select_tool': 'Select and execute a tool after loading a case file.',
             'note': 'Add a note to the specified case file.',
             'list_cases': 'List all files in the "archive cases" folder.',
             'exit': 'Exit the CLI.',
