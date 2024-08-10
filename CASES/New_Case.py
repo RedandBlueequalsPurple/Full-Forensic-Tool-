@@ -3,12 +3,7 @@ import re
 import cmd
 import importlib.util
 import sys
-import logging
 from datetime import datetime
-
-# Configure logging
-logging.basicConfig(filename='case_manager.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 class CaseManager(cmd.Cmd):
     prompt = '> '
@@ -25,16 +20,12 @@ class CaseManager(cmd.Cmd):
         """Ensure that the 'archive cases' folder exists."""
         if not os.path.isdir(self.archive_folder):
             os.makedirs(self.archive_folder)
-            logging.info(f"Folder '{self.archive_folder}' created.")
-        else:
-            logging.info(f"Folder '{self.archive_folder}' already exists.")
 
     def log_to_case_file(self, message):
         """Log a message to the current case file."""
         if self.current_case_file:
             with open(self.current_case_file, 'a') as file:
                 file.write(f"{datetime.now()} - {message}\n")
-            logging.info(f"Logged to case file: {message}")
 
     def create_next_case_file(self):
         """Create a new case file with an incremented number."""
@@ -60,7 +51,6 @@ class CaseManager(cmd.Cmd):
             file.write(f"Case Number: {new_number // 1000:03d}-{new_number % 1000:03d}\n")
             file.write("User Data:\n")
 
-        logging.info(f"File '{new_filename}' created in folder '{self.archive_folder}'.")
         self.current_case_file = new_file_path
         self.log_to_case_file("Case file created.")
         self.add_user_data(new_file_path)
@@ -89,9 +79,6 @@ class CaseManager(cmd.Cmd):
             file.write(f"Name of the Investigator: {investigator_name}\n")
             file.write(f"Description of the Case: {case_description}\n")
             file.write("\nUser Data:\n")
-        
-        logging.info(f"Data added to '{file_path}'.")
-        print(f"Data added to '{file_path}'.")
 
         # Update prompt to reflect the new case number
         case_number = os.path.basename(file_path).split('.')[0]
@@ -180,7 +167,6 @@ class CaseManager(cmd.Cmd):
                     main_DB.DBCLI().cmdloop()  # This will start the CLI for the DB tool
                 except ImportError as e:
                     print(f"Error importing main_DB: {e}")
-                    logging.error(f"Error importing main_DB: {e}")
                 break
             elif Choice == "8":
                 print("PNG Analysis was selected")
@@ -215,46 +201,43 @@ class CaseManager(cmd.Cmd):
                 self.log_to_case_file("Invalid tool selection attempted.")
 
     def do_list_cases(self, arg):
-        """List all cases in the archive."""
-        files = os.listdir(self.archive_folder)
-        case_files = [file for file in files if file.startswith('case') and file.endswith('.txt')]
+        """List all cases in the archive folder."""
+        if not os.path.isdir(self.archive_folder):
+            print("No cases found.")
+            return
 
-        if case_files:
-            print("List of case files:")
-            for file in case_files:
-                print(file)
+        files = os.listdir(self.archive_folder)
+        cases = [file for file in files if file.startswith("case") and file.endswith(".txt")]
+
+        if cases:
+            print("List of cases:")
+            for case in cases:
+                print(case)
         else:
-            print("No case files found.")
+            print("No cases found.")
 
     def do_note(self, arg):
         """Add a note to the current case file."""
-        if not self.case_created:
-            print("You must create a case before adding a note.")
+        if not self.current_case_file:
+            print("No case file selected.")
             return
 
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        investigator_name = input("Name of the Investigator: ")
         note = input("Enter your note: ")
-
-        if self.current_case_file:
-            with open(self.current_case_file, 'a') as file:
-                file.write(f"\nNote ({date_str}): {note}\n")
-                file.write(f"Added by: {investigator_name}\n")
-
-            logging.info(f"Note added to case file '{self.current_case_file}'.")
-            print(f"Note added to case file '{self.current_case_file}'.")
-
-    def do_exit(self, arg):
-        """Exit the CLI."""
-        print("Exiting...")
-        return True
+        if note:
+            self.log_to_case_file(f"Note added: {note}")
+            print("Note added.")
 
     def import_module_from_path(self, module_name, path):
-        """Import a module given its path."""
+        """Dynamically import a module from a given path."""
         spec = importlib.util.spec_from_file_location(module_name, path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
 
-if __name__ == '__main__':
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        print("Exiting Case Manager CLI.")
+        return True
+
+if __name__ == "__main__":
     CaseManager().cmdloop()
