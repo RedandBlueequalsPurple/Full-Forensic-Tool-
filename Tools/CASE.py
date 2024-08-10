@@ -1,4 +1,32 @@
 import cmd
+import subprocess
+import sys
+import os
+
+# Define the directory containing the script files relative to the current script's location
+# Update this to point to the correct directory where CASES is located
+script_dir = os.path.join(os.path.dirname(__file__), '../CASES')  # Adjust path as necessary
+print(f"Script directory: {script_dir}")  # Debugging line
+
+def run_New_Case():
+    """Run the New_Case script."""
+    print("Please wait while we are making all you need to make a new case!...")  # Fixed typo
+    New_Case_path = os.path.join(script_dir, 'New_Case.py')
+    print(f"New_Case path: '{New_Case_path}'")  # Debugging line
+    if os.path.exists(New_Case_path):
+        subprocess.run([sys.executable, New_Case_path])
+    else:
+        print(f"Error: File '{New_Case_path}' does not exist.")  # Error handling
+
+def run_Load_Case():
+    """Run the Load_Case script."""
+    print("Please wait while we are loading the case you asked ...")  # Fixed typo
+    Load_Case_path = os.path.join(script_dir, 'Load_Case.py')
+    print(f"Load_Case path: '{Load_Case_path}'")  # Debugging line
+    if os.path.exists(Load_Case_path):
+        subprocess.run([sys.executable, Load_Case_path])
+    else:
+        print(f"Error: File '{Load_Case_path}' does not exist.")  # Error handling
 
 def main():
     class CaseSanction(cmd.Cmd):
@@ -15,7 +43,12 @@ def main():
         def do_start(self, arg):
             """Start the CASE sanction process"""
             print("Starting the CASE sanction process...")
-            # Add code to start an investigation here
+            run_New_Case()  # Invoke the New_Case script
+
+        def do_load(self, arg):
+            """Load an existing case"""
+            print("Loading the requested case...")
+            run_Load_Case()  # Invoke the Load_Case script
 
         def do_exit(self, arg):
             """Exit the CASE sanction system"""
@@ -29,6 +62,7 @@ def main():
             else:
                 print("Available commands:\n"
                       "  start  - Start the CASE sanction process\n"
+                      "  load   - Load an existing case\n"
                       "  exit   - Exit the CASE sanction system\n"
                       "  help   - Show this help message\n")
 
