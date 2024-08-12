@@ -6,8 +6,8 @@ import sys
 from datetime import datetime
 
 class CaseManager(cmd.Cmd):
-    prompt = '> '
     intro = "Welcome to the Case Manager CLI. Type 'help' or '?' to list commands."
+    prompt = '> '
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -210,7 +210,7 @@ class CaseManager(cmd.Cmd):
         cases = [file for file in files if file.startswith("case") and file.endswith(".txt")]
 
         if cases:
-            print("List of cases:")
+            print("Archived Cases:")
             for case in cases:
                 print(case)
         else:
@@ -219,25 +219,53 @@ class CaseManager(cmd.Cmd):
     def do_note(self, arg):
         """Add a note to the current case file."""
         if not self.current_case_file:
-            print("No case file selected.")
+            print("No case file is currently selected.")
             return
 
+        investigator_name = input("Name of the Investigator: ")
         note = input("Enter your note: ")
-        if note:
-            self.log_to_case_file(f"Note added: {note}")
-            print("Note added.")
 
-    def import_module_from_path(self, module_name, path):
+        with open(self.current_case_file, 'a') as file:
+            file.write(f"{datetime.now()} - Investigator: {investigator_name}\n")
+            file.write(f"Note: {note}\n\n")
+
+        print("Note added.")
+        self.log_to_case_file(f"Note added by {investigator_name}.")
+
+    def do_exit(self, arg):
+        """Exit the Case Manager CLI."""
+        print("Goodbye!")
+        return True
+
+    def do_new(self, arg):
+        """Create a new case file."""
+        self.create_next_case_file()
+
+    def import_module_from_path(self, module_name, module_path):
         """Dynamically import a module from a given path."""
-        spec = importlib.util.spec_from_file_location(module_name, path)
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
         module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
         spec.loader.exec_module(module)
         return module
 
-    def do_exit(self, arg):
-        """Exit the CLI."""
-        print("Exiting Case Manager CLI.")
-        return True
+    def do_help(self, arg):
+        """Display the help message."""
+        if arg:
+            try:
+                func = getattr(self, 'do_' + arg)
+                func.__doc__ and print(f"{arg}: {func.__doc__}")
+            except AttributeError:
+                print(f"No help available for '{arg}'")
+        else:
+            print("Available commands:")
+            print(" new    - Create a new case")
+            print(" list   - List all archived cases")
+            print(" note   - Add a note to the current case file")
+            print(" tool   - Select a tool to analyze the case")
+            print(" exit   - Exit the CASE sanction system")
+            print(" help   - Show this help message")
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     CaseManager().cmdloop()
