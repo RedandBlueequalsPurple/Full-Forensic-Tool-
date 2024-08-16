@@ -92,7 +92,7 @@ class CaseManager(cmd.Cmd):
         """Create a new case file."""
         self.create_next_case_file()
 
-    def do_select_tool(self, arg):
+    def do_tool(self, arg):
         """Select a tool to use."""
         if not self.case_created:
             print("You must create a case before selecting a tool.")

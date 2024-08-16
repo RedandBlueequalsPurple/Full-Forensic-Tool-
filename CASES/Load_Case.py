@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 import importlib.util
 import logging
+import sys
 
 class CaseFileCLI(cmd.Cmd):
     prompt = 'casefile> '
@@ -10,56 +11,53 @@ class CaseFileCLI(cmd.Cmd):
     def __init__(self, file_path):
         super().__init__()
         self.file_path = file_path
-        self.ensure_archive_cases_folder()
         self.current_case_number = None
         self.log_file = None
         self.current_tool_choice = None
+        self.case_created = False
+
+        # Set up the archive cases folder
+        self.ensure_archive_cases_folder()
 
         # Set up logging
         self.setup_logging()
 
     def ensure_archive_cases_folder(self):
-        folder_name = "archive cases"
-        if not os.path.isdir(folder_name):
-            os.makedirs(folder_name)
+        """Ensure that the 'archive cases' folder exists."""
+        folder_path = "archive cases"
+        if not os.path.isdir(folder_path):
+            os.makedirs(folder_path)
 
     def setup_logging(self):
         """Set up logging for the CLI."""
         if self.current_case_number:
-            # Determine log file location based on the current case
             case_file_name = f"case {self.current_case_number}.txt"
-            case_file_path = os.path.join("archive cases", case_file_name)
-            
-            # Ensure the case file exists before setting up logging
-            if os.path.exists(case_file_path):
-                self.log_file = case_file_path
-            else:
+            self.log_file = os.path.join("archive cases", case_file_name)
+            if not os.path.exists(self.log_file):
                 print(f"Case file {case_file_name} does not exist. Logging will not be set up.")
                 self.log_file = None
         else:
             self.log_file = None
 
         if self.log_file:
-            logging.basicConfig(filename=self.log_file, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+            logging.basicConfig(filename=self.log_file, level=logging.INFO,
+                                format='%(asctime)s - %(levelname)s - %(message)s')
             logging.info('CaseFileCLI initialized.')
 
     def list_files_in_archive_cases(self):
         """List all files in the 'archive cases' folder."""
-        folder_name = "archive cases"
-        if os.path.isdir(folder_name):
-            print(f"Files in '{folder_name}':")
-            for filename in os.listdir(folder_name):
-                file_path = os.path.join(folder_name, filename)
+        folder_path = "archive cases"
+        if os.path.isdir(folder_path):
+            print(f"Files in '{folder_path}':")
+            for filename in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, filename)
                 if os.path.isfile(file_path):
                     print(f" - {filename}")
         else:
-            print(f"The folder '{folder_name}' does not exist.")
+            print(f"The folder '{folder_path}' does not exist.")
 
     def do_load(self, line):
-        """
-        Load the case file with the specified case number.
-        Usage: load
-        """
+        """Load the case file with the specified case number."""
         case_number = input("Enter case number (format XXX-XXX): ").strip()
         if not case_number:
             print("Case number is required.")
@@ -78,6 +76,7 @@ class CaseFileCLI(cmd.Cmd):
                 # Update the prompt to reflect the current case number
                 self.current_case_number = case_number
                 self.prompt = f"case {case_number}> "
+                self.case_created = True
                 
                 # Re-setup logging to use the case-specific file
                 self.setup_logging()
@@ -96,19 +95,12 @@ class CaseFileCLI(cmd.Cmd):
         else:
             print(f"The case file '{case_file_name}' does not exist in 'archive cases'.")
 
-    def do_select_tool(self, line):
-        """
-        Select a tool to execute.
-        Usage: select_tool
-        """
-        if not self.current_case_number:
-            print("No case is currently loaded.")
+    def do_tool(self, arg):
+        """Select a tool to use."""
+        if not self.case_created:
+            print("You must create a case before selecting a tool.")
             return
 
-        self.show_tool_menu()
-
-    def show_tool_menu(self):
-        """Display tool selection menu and handle user choice."""
         print("Choose which tool you need:")
         list_of_tools = [
             [1, 'Email'], [2, 'PDF'], [3, 'ISO'], [4, 'OVA'], [5, 'URL'],
@@ -124,51 +116,97 @@ class CaseFileCLI(cmd.Cmd):
             if choice == 'exit':
                 print("Bye!")
                 if self.log_file:
-                    logging.info("Exiting CLI.")
+                    self.log_to_case_file("User exited tool selection.")
                 break
-            elif choice in [str(tool[0]) for tool in list_of_tools]:
-                self.current_tool_choice = int(choice)
-                self.handle_tool_choice(self.current_tool_choice)
+            elif choice == "1":
+                print("Email Analysis was selected")
+                module_path = os.path.join("Tools", "Email_Analysis.py")
+                email_analysis = self.import_module_from_path("Email_Analysis", module_path)
+                email_analysis.main()
+                self.log_to_case_file("Email Analysis tool selected and executed.")
+                break
+            elif choice == "2":
+                print("PDF Analysis was selected")
+                module_path = os.path.join("Tools", "PDF_Analysis.py")
+                pdf_analysis = self.import_module_from_path("PDF_Analysis", module_path)
+                pdf_analysis.main()
+                self.log_to_case_file("PDF Analysis tool selected and executed.")
+                break
+            elif choice == "3":
+                print("ISO Analysis was selected")
+                module_path = os.path.join("Tools", "ISO_Analysis.py")
+                iso_analysis = self.import_module_from_path("ISO_Analysis", module_path)
+                iso_analysis.main()
+                self.log_to_case_file("ISO Analysis tool selected and executed.")
+                break
+            elif choice == "4":
+                print("OVA Analysis was selected")
+                module_path = os.path.join("Tools", "OVA_Analysis.py")
+                ova_analysis = self.import_module_from_path("OVA_Analysis", module_path)
+                ova_analysis.main()
+                self.log_to_case_file("OVA Analysis tool selected and executed.")
+                break
+            elif choice == "5":
+                print("URL Analysis was selected")
+                module_path = os.path.join("Tools", "URL_Analysis.py")
+                url_analysis = self.import_module_from_path("URL_Analysis", module_path)
+                url_analysis.main()
+                self.log_to_case_file("URL Analysis tool selected and executed.")
+                break
+            elif choice == "6":
+                print("JSON Analysis was selected")
+                module_path = os.path.join("Tools", "JSON_Analysis.py")
+                json_analysis = self.import_module_from_path("JSON_Analysis", module_path)
+                json_analysis.main()
+                self.log_to_case_file("JSON Analysis tool selected and executed.")
+                break
+            elif choice == "7":
+                print("DB was selected")
+                db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "DB"))  # Correct path to DB folder
+                sys.path.append(db_path)  # Add the DB path to sys.path
+
+                try:
+                    import main_DB  # Import the main_DB module
+                    main_DB.DBCLI().cmdloop()  # This will start the CLI for the DB tool
+                except ImportError as e:
+                    print(f"Error importing main_DB: {e}")
+                break
+            elif choice == "8":
+                print("PNG Analysis was selected")
+                module_path = os.path.join("Tools", "PNG_Analysis.py")
+                png_analysis = self.import_module_from_path("PNG_Analysis", module_path)
+                png_analysis.main()
+                self.log_to_case_file("PNG Analysis tool selected and executed.")
+                break
+            elif choice == "9":
+                print("CODE Analysis was selected")
+                module_path = os.path.join("Tools", "CODE_Analysis.py")
+                code_analysis = self.import_module_from_path("CODE_Analysis", module_path)
+                code_analysis.main()
+                self.log_to_case_file("CODE Analysis tool selected and executed.")
+                break
+            elif choice == "10":
+                print("EXE / DMG Analysis was selected")
+                module_path = os.path.join("Tools", "EXE_DMG_Analysis.py")
+                exe_dmg_analysis = self.import_module_from_path("EXE_DMG_Analysis", module_path)
+                exe_dmg_analysis.main()
+                self.log_to_case_file("EXE / DMG Analysis tool selected and executed.")
+                break
+            elif choice == "11":
+                print("EVENT VIEWER Analysis was selected")
+                module_path = os.path.join("Tools", "EVENT_VIEWER_Analysis.py")
+                event_viewer_analysis = self.import_module_from_path("EVENT_VIEWER_Analysis", module_path)
+                event_viewer_analysis.main()
+                self.log_to_case_file("EVENT VIEWER Analysis tool selected and executed.")
                 break
             else:
-                print("Invalid choice. Please select a valid tool.")
-                if self.log_file:
-                    logging.warning(f"Invalid tool choice: {choice}")
+                print("Invalid choice. Please try again.")
+                self.log_to_case_file("Invalid tool selection attempted.")
 
-    def handle_tool_choice(self, choice):
-        """Handle the tool choice and execute the corresponding module."""
-        tool_map = {
-            1: 'Email_Analysis',
-            2: 'PDF_Analysis',
-            3: 'ISO_Analysis',
-            4: 'OVA_Analysis',
-            5: 'URL_Analysis',
-            6: 'JSON_Analysis',
-            7: 'main_DB',
-            8: 'PNG_Analysis',
-            9: 'CODE_Analysis',
-            10: 'EXE_DMG_Analysis',
-            11: 'Event_Viewer'
-        }
-
-        tool_name = tool_map.get(choice)
-        if tool_name:
-            print(f"{tool_name.replace('_', ' ')} was selected")
-            module_path = os.path.join("Tools" if choice != 7 else "DB", f"{tool_name}.py")
-            module = self.import_module_from_path(tool_name, module_path)
-            if module:
-                if hasattr(module, 'main'):
-                    module.main()
-                    if self.log_file:
-                        logging.info(f"Executed tool: {tool_name}")
-                else:
-                    print(f"Module {tool_name} does not have a 'main' function.")
-                    if self.log_file:
-                        logging.error(f"Module {tool_name} does not have a 'main' function.")
-        else:
-            print("An error occurred: Tool not found.")
-            if self.log_file:
-                logging.error(f"Tool not found for choice: {choice}")
+    def log_to_case_file(self, message):
+        """Log a message to the current case file."""
+        if self.log_file:
+            logging.info(message)
 
     def import_module_from_path(self, module_name, module_path):
         """Import a module from a specific path."""
@@ -185,76 +223,54 @@ class CaseFileCLI(cmd.Cmd):
             return None
 
     def do_note(self, line):
-        """
-        Add a note to the specified case file.
-        Usage: note <case_number>
-        """
+        """Add a note to the specified case file."""
         if not self.current_case_number:
-            print("No case is currently loaded.")
-            return
-        
-        investigator = input("Enter the name of the investigator: ").strip()
-        if not investigator:
-            print("Name of the investigator is required.")
-            return
-        
-        note = input("Enter your note: ").strip()
-        if not note:
-            print("Note cannot be empty.")
+            print("No case is currently loaded. Use 'load' command to load a case.")
             return
 
-        note_date = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-        case_file_name = f"case {self.current_case_number}.txt"
-        case_file_path = os.path.join("archive cases", case_file_name)
+        note_text = input("Enter note text: ").strip()
+        if not note_text:
+            print("Note text is required.")
+            return
+
+        note_file_name = f"note_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        note_file_path = os.path.join("archive cases", note_file_name)
         
         try:
-            if os.path.exists(case_file_path):
-                with open(case_file_path, 'a') as file:
-                    file.write(f"\n\nNote Added on {note_date}\nInvestigator: {investigator}\nNote: {note}")
-                print(f"Note added to {case_file_path} successfully.")
-                if self.log_file:
-                    logging.info(f"Note added to case file {case_file_name} by {investigator}.")
-            else:
-                print(f"The case file '{case_file_name}' does not exist in 'archive cases'.")
-        
+            with open(note_file_path, 'w') as file:
+                file.write(note_text)
+            print(f"Note added: {note_file_name}")
+            self.log_to_case_file(f"Note added: {note_file_name}")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred while saving the note: {e}")
             if self.log_file:
-                logging.error(f"Error adding note to case file {case_file_name}: {e}")
+                logging.error(f"Error saving note {note_file_name}: {e}")
 
-    def do_list_cases(self, line):
-        """
-        List all files in the 'archive cases' folder.
-        Usage: list_cases
-        """
+    def do_list(self, line):
+        """List all archived cases."""
         self.list_files_in_archive_cases()
 
     def do_exit(self, line):
         """Exit the CLI."""
-        print("Exiting CLI.")
-        if self.log_file:
-            logging.info("CLI exited.")
-        return True
+        print("Exiting...")
+        sys.exit()
 
     def do_help(self, line):
-        """Display help information for available commands."""
-        commands = {
-            'load': 'Load the case file with the specified case number.',
-            'select_tool': 'Select and execute a tool after loading a case file.',
-            'note': 'Add a note to the specified case file.',
-            'list_cases': 'List all files in the "archive cases" folder.',
-            'exit': 'Exit the CLI.',
-            'help': 'Display help information for available commands.'
+        """Display help information."""
+        help_messages = {
+            'list': 'List all archived cases',
+            'note': 'Add a note to the current case file',
+            'tool': 'Select a tool to analyze the case',
+            'exit': 'Exit the CASE sanction system',
+            'help': 'Show this help message',
+            'load': 'Load an existing case file'
         }
-        if line:
-            if line in commands:
-                print(f"{line}: {commands[line]}")
-            else:
-                print(f"No help available for command: {line}")
-        else:
-            for cmd, desc in commands.items():
-                print(f"{cmd}: {desc}")
+        print("Documented commands (type help <topic>):")
+        print("========================================")
+        for command, description in sorted(help_messages.items()):
+            print(f"{command:<6} - {description}")
 
 if __name__ == '__main__':
-    cli = CaseFileCLI(file_path="your_initial_file_path_here.txt")
+    # Adjust the file_path as needed for your use case
+    cli = CaseFileCLI(file_path="casefile.txt")
     cli.cmdloop()
