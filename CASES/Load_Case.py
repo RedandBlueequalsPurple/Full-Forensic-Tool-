@@ -162,14 +162,10 @@ class CaseFileCLI(cmd.Cmd):
                 break
             elif choice == "7":
                 print("DB was selected")
-                db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "DB"))  # Correct path to DB folder
-                sys.path.append(db_path)  # Add the DB path to sys.path
-
-                try:
-                    import main_DB  # Import the main_DB module
-                    main_DB.DBCLI().cmdloop()  # This will start the CLI for the DB tool
-                except ImportError as e:
-                    print(f"Error importing main_DB: {e}")
+                module_path = os.path.join("DB","main_DB.py")
+                main_DB = self.import_module_from_path("main_DB", module_path)
+                main_DB.main()
+                self.log_to_case_file("DB was seleceted and executed")
                 break
             elif choice == "8":
                 print("PNG Analysis was selected")
