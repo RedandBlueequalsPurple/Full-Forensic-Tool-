@@ -86,7 +86,7 @@ class CaseFileCLI(cmd.Cmd):
                     logging.info(f"Loaded case file: {case_file_name}")
                 
                 # Tool selection menu
-                self.show_tool_menu()
+                # self.ListOfTools()
                 
             except Exception as e:
                 print(f"An error occurred while reading the file: {e}")
@@ -102,97 +102,97 @@ class CaseFileCLI(cmd.Cmd):
             return
 
         print("Choose which tool you need:")
-        list_of_tools = [
+        ListOfTools = [
             [1, 'Email'], [2, 'PDF'], [3, 'ISO'], [4, 'OVA'], [5, 'URL'],
             [6, 'JSON'], [7, 'DB'], [8, 'PNG'], [9, 'CODE'], [10, 'EXE / DMG'], [11, 'EVENT VIEWER']
         ]
 
-        for tool in list_of_tools:
+        for tool in ListOfTools:
             print(f"{tool[0]}: {tool[1]}")
 
         while True:
-            choice = input("Choose the tool you need or type 'exit' to quit: ").strip()
+            Choice = input("Choose the tool you need or type 'exit' to quit: ")
 
-            if choice == 'exit':
+            if Choice == 'exit':
                 print("Bye!")
-                if self.log_file:
+                if self.current_case_file:
                     self.log_to_case_file("User exited tool selection.")
                 break
-            elif choice == "1":
+            elif Choice == "1":
                 print("Email Analysis was selected")
                 module_path = os.path.join("Tools", "Email_Analysis.py")
-                email_analysis = self.import_module_from_path("Email_Analysis", module_path)
-                email_analysis.main()
+                Email_Analysis = self.import_module_from_path("Email_Analysis", module_path)
+                Email_Analysis.main()
                 self.log_to_case_file("Email Analysis tool selected and executed.")
                 break
-            elif choice == "2":
+            elif Choice == "2":
                 print("PDF Analysis was selected")
                 module_path = os.path.join("Tools", "PDF_Analysis.py")
-                pdf_analysis = self.import_module_from_path("PDF_Analysis", module_path)
-                pdf_analysis.main()
+                PDF_Analysis = self.import_module_from_path("PDF_Analysis", module_path)
+                PDF_Analysis.main()
                 self.log_to_case_file("PDF Analysis tool selected and executed.")
                 break
-            elif choice == "3":
+            elif Choice == "3":
                 print("ISO Analysis was selected")
                 module_path = os.path.join("Tools", "ISO_Analysis.py")
-                iso_analysis = self.import_module_from_path("ISO_Analysis", module_path)
-                iso_analysis.main()
+                ISO_Analysis = self.import_module_from_path("ISO_Analysis", module_path)
+                ISO_Analysis.main()
                 self.log_to_case_file("ISO Analysis tool selected and executed.")
                 break
-            elif choice == "4":
+            elif Choice == "4":
                 print("OVA Analysis was selected")
                 module_path = os.path.join("Tools", "OVA_Analysis.py")
-                ova_analysis = self.import_module_from_path("OVA_Analysis", module_path)
-                ova_analysis.main()
+                OVA_Analysis = self.import_module_from_path("OVA_Analysis", module_path)
+                OVA_Analysis.main()
                 self.log_to_case_file("OVA Analysis tool selected and executed.")
                 break
-            elif choice == "5":
+            elif Choice == "5":
                 print("URL Analysis was selected")
                 module_path = os.path.join("Tools", "URL_Analysis.py")
-                url_analysis = self.import_module_from_path("URL_Analysis", module_path)
-                url_analysis.main()
+                URL_Analysis = self.import_module_from_path("URL_Analysis", module_path)
+                URL_Analysis.main()
                 self.log_to_case_file("URL Analysis tool selected and executed.")
                 break
-            elif choice == "6":
+            elif Choice == "6":
                 print("JSON Analysis was selected")
                 module_path = os.path.join("Tools", "JSON_Analysis.py")
-                json_analysis = self.import_module_from_path("JSON_Analysis", module_path)
-                json_analysis.main()
+                JSON_Analysis = self.import_module_from_path("JSON_Analysis", module_path)
+                JSON_Analysis.main()
                 self.log_to_case_file("JSON Analysis tool selected and executed.")
                 break
-            elif choice == "7":
+            elif Choice == "7":
                 print("DB was selected")
                 module_path = os.path.join("DB","main_DB.py")
                 main_DB = self.import_module_from_path("main_DB", module_path)
                 main_DB.main()
                 self.log_to_case_file("DB was seleceted and executed")
                 break
-            elif choice == "8":
+            elif Choice == "8":
                 print("PNG Analysis was selected")
                 module_path = os.path.join("Tools", "PNG_Analysis.py")
-                png_analysis = self.import_module_from_path("PNG_Analysis", module_path)
-                png_analysis.main()
+                PNG_Analysis = self.import_module_from_path("PNG_Analysis", module_path)
+                PNG_Analysis.main()
                 self.log_to_case_file("PNG Analysis tool selected and executed.")
                 break
-            elif choice == "9":
+            elif Choice == "9":
                 print("CODE Analysis was selected")
                 module_path = os.path.join("Tools", "CODE_Analysis.py")
-                code_analysis = self.import_module_from_path("CODE_Analysis", module_path)
-                code_analysis.main()
+                CODE_Analysis = self.import_module_from_path("CODE_Analysis", module_path)
+                CODE_Analysis.main()
                 self.log_to_case_file("CODE Analysis tool selected and executed.")
                 break
-            elif choice == "10":
+            elif Choice == "10":
                 print("EXE / DMG Analysis was selected")
                 module_path = os.path.join("Tools", "EXE_DMG_Analysis.py")
-                exe_dmg_analysis = self.import_module_from_path("EXE_DMG_Analysis", module_path)
-                exe_dmg_analysis.main()
+                EXE_DMG_Analysis = self.import_module_from_path("EXE_DMG_Analysis", module_path)
+                EXE_DMG_Analysis.main()
                 self.log_to_case_file("EXE / DMG Analysis tool selected and executed.")
                 break
-            elif choice == "11":
+            elif Choice == "11":
                 print("EVENT VIEWER Analysis was selected")
                 module_path = os.path.join("Tools", "EVENT_VIEWER_Analysis.py")
-                event_viewer_analysis = self.import_module_from_path("EVENT_VIEWER_Analysis", module_path)
-                event_viewer_analysis.main()
+                EVENT_VIEWER_Analysis = self.import_module_from_path("EVENT_VIEWER_Analysis", module_path)
+                EVENT_VIEWER_Analysis.main()
                 self.log_to_case_file("EVENT VIEWER Analysis tool selected and executed.")
                 break
             else:
@@ -205,18 +205,12 @@ class CaseFileCLI(cmd.Cmd):
             logging.info(message)
 
     def import_module_from_path(self, module_name, module_path):
-        """Import a module from a specific path."""
+        """Dynamically import a module from a given path."""
         spec = importlib.util.spec_from_file_location(module_name, module_path)
         module = importlib.util.module_from_spec(spec)
-        try:
-            spec.loader.exec_module(module)
-            print(f"Imported module {module_name}: {module.__dict__}")
-            return module
-        except Exception as e:
-            print(f"An error occurred while importing the module: {e}")
-            if self.log_file:
-                logging.error(f"Error importing module {module_name}: {e}")
-            return None
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
 
     def do_note(self, line):
         """Add a note to the specified case file."""

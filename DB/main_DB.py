@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 import cmd
+import DB.main_DB as main_DB  # Import the DBCLI class from the main_DB module
 
 # Define the directory containing the script files relative to the current script's location
 script_dir = os.path.join(os.path.dirname(__file__))
@@ -32,7 +33,7 @@ def run_vs():
 
 class DBCLI(cmd.Cmd):
     prompt = '(DB-cli) '
-    
+
     def do_config(self, arg):
         """Run the config script."""
         run_config()
@@ -68,5 +69,6 @@ class DBCLI(cmd.Cmd):
             print("exit     Exit the CLI")
             print("help     Show this help message")
 
+# Ensure that the script runs the DBCLI command loop when executed directly
 if __name__ == '__main__':
-    DBCLI().cmdloop()
+    main_DB.DBCLI().cmdloop()
