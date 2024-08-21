@@ -85,9 +85,6 @@ class CaseFileCLI(cmd.Cmd):
                 if self.log_file:
                     logging.info(f"Loaded case file: {case_file_name}")
                 
-                # Tool selection menu
-                # self.ListOfTools()
-                
             except Exception as e:
                 print(f"An error occurred while reading the file: {e}")
                 if self.log_file:
@@ -115,8 +112,7 @@ class CaseFileCLI(cmd.Cmd):
 
             if Choice == 'exit':
                 print("Bye!")
-                if self.current_case_file:
-                    self.log_to_case_file("User exited tool selection.")
+                self.log_to_case_file("User exited tool selection.")
                 break
             elif Choice == "1":
                 print("Email Analysis was selected")
@@ -162,10 +158,10 @@ class CaseFileCLI(cmd.Cmd):
                 break
             elif Choice == "7":
                 print("DB was selected")
-                module_path = os.path.join("DB","main_DB.py")
+                module_path = os.path.join(os.path.dirname(__file__), "../..", "FULL FORNSIC TOOL/DB", "main_DB.py")
                 main_DB = self.import_module_from_path("main_DB", module_path)
-                main_DB.main()
-                self.log_to_case_file("DB was seleceted and executed")
+                main_DB.DBCLI().cmdloop()  # Assuming DBCLI is the class in main_DB.py
+                self.log_to_case_file("DB was selected and executed.")
                 break
             elif Choice == "8":
                 print("PNG Analysis was selected")
@@ -232,35 +228,69 @@ class CaseFileCLI(cmd.Cmd):
             print(f"Note added: {note_file_name}")
             self.log_to_case_file(f"Note added: {note_file_name}")
         except Exception as e:
-            print(f"An error occurred while saving the note: {e}")
-            if self.log_file:
-                logging.error(f"Error saving note {note_file_name}: {e}")
+            print(f"Failed to add note: {e}")
+            self.log_to_case_file(f"Failed to add note: {e}")
+
+    def do_new(self, line):
+        """Create a new case file."""
+        case_number = input("Enter case number (format XXX-XXX): ").strip()
+        if not case_number:
+            print("Case number is required.")
+            return
+
+        case_file_name = f"case {case_number}.txt"
+        case_file_path = os.path.join("archive cases", case_file_name)
+        
+        if os.path.exists(case_file_path):
+            print(f"Case file '{case_file_name}' already exists.")
+            return
+
+        investigator_name = input("Enter name of investigator: ").strip()
+        description = input("Enter case description: ").strip()
+        date_created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        try:
+            with open(case_file_path, 'w') as file:
+                file.write(f"Case Number: {case_number}\n")
+                file.write(f"Investigator: {investigator_name}\n")
+                file.write(f"Description: {description}\n")
+                file.write(f"Date Created: {date_created}\n")
+            print(f"Case created: {case_file_name}")
+            
+            # Update the current case number and prompt
+            self.current_case_number = case_number
+            self.prompt = f"case {case_number}> "
+            self.case_created = True
+
+            # Re-setup logging to use the case-specific file
+            self.setup_logging()
+
+            # Log the case creation event
+            self.log_to_case_file(f"New case created: {case_file_name}")
+        except Exception as e:
+            print(f"Failed to create case file: {e}")
+            self.log_to_case_file(f"Failed to create case file: {e}")
 
     def do_list(self, line):
-        """List all archived cases."""
+        """List all case files in the 'archive cases' folder."""
         self.list_files_in_archive_cases()
 
     def do_exit(self, line):
-        """Exit the CLI."""
-        print("Exiting...")
-        sys.exit()
+        """Exit the CASE sanction system."""
+        print("Goodbye!")
+        return True
 
     def do_help(self, line):
-        """Display help information."""
-        help_messages = {
-            'list': 'List all archived cases',
-            'note': 'Add a note to the current case file',
-            'tool': 'Select a tool to analyze the case',
-            'exit': 'Exit the CASE sanction system',
-            'help': 'Show this help message',
-            'load': 'Load an existing case file'
-        }
-        print("Documented commands (type help <topic>):")
-        print("========================================")
-        for command, description in sorted(help_messages.items()):
-            print(f"{command:<6} - {description}")
+        """Show this help message."""
+        print("Commands:")
+        print(" load  - Load an existing case")
+        print(" tool  - Select a tool to use")
+        print(" note  - Add a note to the current case")
+        print(" list  - List all case files")
+        print(" exit  - Exit the CASE sanction system")
+        print(" help  - Show this help message.")
 
 if __name__ == '__main__':
-    # Adjust the file_path as needed for your use case
-    cli = CaseFileCLI(file_path="casefile.txt")
+    file_path = os.path.dirname(__file__)
+    cli = CaseFileCLI(file_path)
     cli.cmdloop()
