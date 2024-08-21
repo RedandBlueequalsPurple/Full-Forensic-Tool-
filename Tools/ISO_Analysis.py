@@ -2,6 +2,28 @@ import pycdlib
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import logging
+
+# Configure logging for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('event_history.log')  # Use the same log file
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+def main():
+    logger.info("ISO Analysis tool execution started.")
+    try:
+        # Tool logic here
+        logger.debug("Executing ISO Analysis tool logic.")
+        # Example action
+        logger.info("ISO Analysis tool action completed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        logger.info("ISO Analysis tool execution finished.")
 
 # Function to extract all files from ISO
 def extract_all_from_iso(iso_path, extract_path):
