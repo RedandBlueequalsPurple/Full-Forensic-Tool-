@@ -4,6 +4,39 @@ import json
 from email.parser import BytesParser
 from email import policy
 from datetime import datetime
+import logging
+
+# Configure logging for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('tool_execution.log')
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+import logging
+
+# Configure logging for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('event_history.log')  # Use the same log file
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+def main():
+    logger.info("Email Analysis tool execution started.")
+    try:
+        # Tool logic here
+        logger.debug("Executing Email Analysis tool logic.")
+        # Example action
+        logger.info("Email Analysis tool action completed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        logger.info("Email Analysis tool execution finished.")
+
+
 
 def read_eml_file(file_path):
     try:
