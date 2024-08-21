@@ -2,6 +2,31 @@ import cmd
 import subprocess
 import sys
 import os
+import logging
+
+# Configure logging for this module
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('event_history.log')  # Use the same log file as the main script
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+def main():
+    logger.info("CASE Section execution started.")
+    try:
+        # Tool logic here
+        logger.debug("Executing CASE Section logic.")
+        # Example action
+        logger.info("CASE Section action completed successfully.")
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        logger.info("CASE Section execution finished.")
+
+
+
 
 # Define the directory containing the script files relative to the current script's location
 # Update this to point to the correct directory where CASES is located
