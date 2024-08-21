@@ -7,7 +7,7 @@ logging.basicConfig(filename='event_history.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def log_tool_selection(choice, module_name):
-    logging.info(f"Tool selection: {choice} ({module_name})")
+    logging.info(f"Tool selected: {choice} ({module_name})")
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
