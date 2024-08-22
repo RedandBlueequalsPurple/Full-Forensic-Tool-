@@ -11,11 +11,23 @@ import logging
 # Configure logging for this module
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler('event_history.log')
-handler.setLevel(logging.DEBUG)
+
+# File handler
+file_handler = logging.FileHandler('event_history.log')
+file_handler.setLevel(logging.DEBUG)
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Formatter
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+
+# Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 def main():
     logger.info("OVA Analysis tool execution started.")
@@ -41,6 +53,7 @@ def print_element_metadata(element, indent=0):
     """Recursively print XML element metadata."""
     spacing = ' ' * indent
     print(f"{spacing}Element: {element.tag}, Attributes: {element.attrib}")
+    logger.info(f"{spacing}Element: {element.tag}, Attributes: {element.attrib}")
     for child in element:
         print_element_metadata(child, indent + 4)
 
@@ -66,6 +79,7 @@ FilePath = input().strip()
 # Check if the file exists
 if not os.path.isfile(FilePath):
     print(f"The file path {FilePath} does not exist.")
+    logger.error(f"The file path {FilePath} does not exist.")
     exit(1)
 
 # Directory to extract the OVA file
@@ -95,6 +109,7 @@ for root, dirs, files in os.walk(extractDir):
 
 if OvfFilePath is None:
     print("No OVF file found in the extracted OVA.")
+    logger.error("No OVF file found in the extracted OVA.")
     exit(1)
 
 # Create the JSON directory if it doesn't exist
@@ -138,18 +153,24 @@ try:
     }
 
     if choice == "1":
-        # Print metadata for all elements
-        print_element_metadata(root)
-        # Print hashes
-        print("File Hashes:")
+        # Print and log metadata for all elements
+        print("Printing metadata:")
+        logger.debug("Choice 1 selected - Printing metadata.")
+        print_element_metadata(root)  # This will print to the console
+        print("File Hashes:")  # This will print to the console
+        logger.info("File Hashes:")  # This will log the information
         for algo, hash_value in file_hashes.items():
-            print(f"{algo.upper()}: {hash_value}")
+            print(f"{algo.upper()}: {hash_value}")  # Print to console
+            logger.info(f"{algo.upper()}: {hash_value}")  # Log to file
+        logger.debug("Metadata and hashes logged.")
+        
     elif choice == "2":
         # Convert the dictionary to JSON
         metadata_json = json.dumps(metadata, indent=4)
-
-        # Print JSON data
-        print(metadata_json)
+        print("JSON Metadata:")  # Print JSON data to console
+        print(metadata_json)  # Print JSON data to console
+        logger.info(metadata_json)  # Log JSON data to file
+        logger.debug("JSON metadata logged.")
 
         # Write JSON data to a file in the JSON directory
         with open(jsonFilePath, 'w') as json_file:
@@ -161,10 +182,14 @@ try:
         # Debugging: Print the script path
         print(f"Script path: {script_path}")
         print(f"JSON file path: {jsonFilePath}")
+        logger.debug(f"Script path: {script_path}")
+        logger.debug(f"JSON file path: {jsonFilePath}")
         
         # Properly handle spaces in the script path
         subprocess.run(["python3", script_path, jsonFilePath], check=True)
 except ET.ParseError as e:
     print(f"ParseError: {e}")
+    logger.error(f"ParseError: {e}")
 except Exception as e:
     print(f"Error: {e}")
+    logger.error(f"Error: {e}")
