@@ -25,6 +25,7 @@ def read_eml_file(file_path):
             headers_text = {}
             for header_name, header_value in msg.items():
                 headers_text[header_name] = header_value
+                logger.debug(f"Header - {header_name}: {header_value}")
 
             # Extract body
             body_text = ""
@@ -32,9 +33,12 @@ def read_eml_file(file_path):
                 for part in msg.walk():
                     content_type = part.get_content_type()
                     if content_type == 'text/plain':
-                        body_text += part.get_payload(decode=True).decode(part.get_content_charset()) + "\n"
+                        part_body = part.get_payload(decode=True).decode(part.get_content_charset())
+                        body_text += part_body + "\n"
+                        logger.debug(f"Multipart body part: {part_body}")
             else:
-                body_text += msg.get_payload(decode=True).decode(msg.get_content_charset()) + "\n"
+                body_text = msg.get_payload(decode=True).decode(msg.get_content_charset()) + "\n"
+                logger.debug(f"Singlepart body: {body_text}")
 
             logger.info(f"Successfully read EML file: {file_path}")
             return msg, headers_text, body_text
@@ -64,6 +68,7 @@ def export_to_json(headers_text, body_text, file_name_prefix):
             json.dump(data, f, ensure_ascii=False, indent=4)
         
         logger.info(f"Data exported to JSON file: {file_path} successfully!")
+        logger.debug(f"Exported JSON content: {json.dumps(data, ensure_ascii=False, indent=4)}")
         print(f"Data exported to {file_path} successfully!")
     except Exception as e:
         logger.error(f"Error exporting data to JSON: {e}")
@@ -78,11 +83,10 @@ def save_attachments(msg, output_dir):
         for part in msg.iter_attachments():
             filename = part.get_filename()
             if filename:
-                logger.info(f"Found attachment: {filename}")
                 filepath = os.path.join(output_dir, filename)
                 with open(filepath, 'wb') as f:
                     f.write(part.get_payload(decode=True))
-        logger.info("Attachments saved successfully.")
+                logger.info(f"Saved attachment: {filename} to {filepath}")
     except Exception as e:
         logger.error(f"Error saving attachments: {e}")
         print("An error occurred while saving attachments:", str(e))
@@ -97,11 +101,9 @@ def main():
         if os.path.isfile(file_path):
             msg, headers_text, body_text = read_eml_file(file_path)
             if msg:
-                print("\nHeaders:\n")
-                print(headers_text)
-                print("\nMessage Body:\n")
-                print(body_text)
-                
+                logger.debug(f"Extracted Headers: {headers_text}")
+                logger.debug(f"Extracted Body: {body_text}")
+
                 file_name_prefix = os.path.splitext(os.path.basename(file_path))[0]
                 export_to_json(headers_text, body_text, file_name_prefix)
 
