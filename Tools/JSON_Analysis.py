@@ -12,18 +12,6 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-def main():
-    logger.info("JSON Analysis tool execution started.")
-    try:
-        # Tool logic here
-        logger.debug("Executing JSON Analysis tool logic.")
-        # Example action
-        logger.info("JSON Analysis tool action completed successfully.")
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-    finally:
-        logger.info("JSON Analysis tool execution finished.")
-
 def extract_keys(obj, keys=set()):
     """Recursively extract all unique keys from a JSON object."""
     if isinstance(obj, dict):
@@ -76,57 +64,74 @@ async def submit_to_virustotal(value, vt_client):
         
         result = response.as_dict()
         
-        # Print the raw response for debugging
-        print(f"Raw Response: {json.dumps(result, indent=2)}")
+        logger.debug(f"Submitted {value} to VirusTotal. Response: {json.dumps(result, indent=2)}")
         return result
 
     except vt.error.APIError as e:
-        print(f"API Error: {e}")
+        logger.error(f"API Error: {e}")
         return {'error': f"API Error: {e}"}
     except Exception as e:
-        print(f"Unexpected Error: {e}")
+        logger.error(f"Unexpected Error: {e}")
         return {'error': f"Unexpected Error: {e}"}
 
 async def analyze_values(values, vt_client):
     """Analyze values using VirusTotal."""
     for value in values:
-        print(f"\nAnalyzing value: {value}")
+        logger.info(f"Analyzing value: {value}")
         result = await submit_to_virustotal(value, vt_client)
         if 'error' in result:
-            print(f"Error: {result['error']}")
+            logger.warning(f"Error for {value}: {result['error']}")
         else:
-            print(f"Result: {json.dumps(result, indent=2)}")
+            logger.info(f"Analysis result for {value}: {json.dumps(result, indent=2)}")
 
 async def main():
-    # Fetch API Key and create VirusTotal client
-    config = get_config()
-    API_KEY = config['api_key']
-    vt_client = vt.Client(API_KEY)
-
-    print("Please give the path to the JSON file")
-    file_path = input().strip()
-
+    logger.info("JSON Analysis tool execution started.")
     try:
+        # Fetch API Key and create VirusTotal client
+        config = get_config()
+        API_KEY = config['api_key']
+        vt_client = vt.Client(API_KEY)
+        logger.debug(f"VirusTotal client initialized with API key: {API_KEY}")
+
+        # Get JSON file path
+        print("Please give the path to the JSON file")
+        file_path = input().strip()
+        logger.debug(f"User provided JSON file path: {file_path}")
+
         # Read JSON data from file
-        with open(file_path, 'r') as file:
-            data = json.load(file)
+        try:
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            logger.info(f"Successfully read JSON file: {file_path}")
+        except FileNotFoundError:
+            logger.error(f"The file '{file_path}' does not exist.")
+            print(f"The file '{file_path}' does not exist.")
+            return
+        except json.JSONDecodeError:
+            logger.error(f"Failed to decode JSON from the file '{file_path}'.")
+            print(f"Failed to decode JSON from the file '{file_path}'.")
+            return
 
         # Get all keys and values
         all_keys = extract_keys(data)
         keys_values_map = extract_values(data)
         keys_values_count = count_values_per_key(keys_values_map)
 
-        # Print each key on a separate line
+        # Log and print keys
+        logger.debug(f"Extracted Keys: {all_keys}")
         print("Keys:")
         for key in all_keys:
             print(f"{key}")
 
-        # Print each value on a separate line
+        # Log and print values
+        all_values = {val for values in keys_values_map.values() for val in values}
+        logger.debug(f"Extracted Values: {all_values}")
         print("\nValues:")
-        for value in {val for values in keys_values_map.values() for val in values}:
+        for value in all_values:
             print(value)
 
-        # Print the keys and values together
+        # Log and print keys and values together
+        logger.debug(f"Keys and Values Map: {keys_values_map}")
         print("\nKeys and Values:")
         for key, values in keys_values_map.items():
             for value in values:
@@ -139,6 +144,7 @@ async def main():
         
         while True:
             query = input("Enter your choice: ").strip()
+            logger.debug(f"User input: {query}")
 
             if query.lower() == 'exit':
                 break
@@ -157,6 +163,7 @@ async def main():
                 # Allow user to choose a key by its serial number or name
                 while True:
                     choice = input("\nEnter the number or name of the key to see its values (or 0 to cancel): ").strip()
+                    logger.debug(f"User key choice: {choice}")
                     if choice == '0':
                         break
                     if choice.isdigit():
@@ -179,11 +186,13 @@ async def main():
                         for value in values_list:
                             print(value)
                         
-                        # Run analysis on the values of the chosen key
+                        # Log and analyze values for the chosen key
+                        logger.info(f"Running VirusTotal analysis on values for key '{chosen_key}': {values_list}")
                         await analyze_values(values_list, vt_client)
                         break
                     else:
                         print(f"Key '{chosen_key}' not found. Please enter a valid key.")
+                        logger.warning(f"User attempted to query non-existing key: {chosen_key}")
                         
             elif query in keys_values_map:
                 print(f"\nValues for key '{query}':")
@@ -191,11 +200,12 @@ async def main():
                     print(value)
             else:
                 print(f"No values found for key '{query}' or invalid key.")
-                
-    except FileNotFoundError:
-        print(f"The file '{file_path}' does not exist.")
-    except json.JSONDecodeError:
-        print(f"Failed to decode JSON from the file '{file_path}'.")
+                logger.warning(f"No values found for key '{query}' or invalid key.")
+
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
+    finally:
+        logger.info("JSON Analysis tool execution finished.")
 
 # Run the main function
 asyncio.run(main())
