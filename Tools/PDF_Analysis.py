@@ -20,18 +20,6 @@ if not event_logger.hasHandlers():
     event_handler.setFormatter(formatter)
     event_logger.addHandler(event_handler)
 
-# Configure logging for detailed PDF analysis
-pdf_logger = logging.getLogger('pdf_logger')
-pdf_logger.setLevel(logging.DEBUG)
-
-# Avoid adding multiple handlers
-if not pdf_logger.hasHandlers():
-    pdf_handler = logging.FileHandler('pdf_analysis.log')
-    pdf_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    pdf_handler.setFormatter(formatter)
-    pdf_logger.addHandler(pdf_handler)
-
 # Directory for saving JSON data
 JSON_DIR = 'JSON'
 
@@ -123,15 +111,15 @@ def extract_text_from_pdf(file_path):
     """
     try:
         text = extract_text(file_path)
-        pdf_logger.debug(f"Extracted text from PDF: {file_path}")
+        event_logger.debug(f"Extracted text from PDF: {file_path}")
         return text
     except FileNotFoundError:
         error_message = f"The file '{file_path}' does not exist."
-        pdf_logger.error(error_message)
+        event_logger.error(error_message)
         print(error_message)
         return None
     except Exception as e:
-        pdf_logger.error(f"An error occurred while extracting text: {e}")
+        event_logger.error(f"An error occurred while extracting text: {e}")
         print(f"An error occurred: {e}")
         return None
 
@@ -147,15 +135,15 @@ def count_lines_in_pdf(file_path):
             text = page.get_text()
             line_count += text.count('\n')
         pdf_document.close()
-        pdf_logger.debug(f"Counted {line_count} lines in PDF: {file_path}")
+        event_logger.debug(f"Counted {line_count} lines in PDF: {file_path}")
         return line_count
     except FileNotFoundError:
         error_message = f"The file '{file_path}' does not exist."
-        pdf_logger.error(error_message)
+        event_logger.error(error_message)
         print(error_message)
         return None
     except Exception as e:
-        pdf_logger.error(f"An error occurred while counting lines: {e}")
+        event_logger.error(f"An error occurred while counting lines: {e}")
         print(f"An error occurred: {e}")
         return None
 
@@ -166,15 +154,15 @@ def get_pdf_metadata(file_path):
     try:
         with fitz.open(file_path) as doc:
             metadata = doc.metadata
-            pdf_logger.debug(f"Extracted metadata from PDF: {metadata}")
+            event_logger.debug(f"Extracted metadata from PDF: {metadata}")
             return metadata
     except FileNotFoundError:
         error_message = f"The file '{file_path}' does not exist."
-        pdf_logger.error(error_message)
+        event_logger.error(error_message)
         print(error_message)
         return None
     except Exception as e:
-        pdf_logger.error(f"An error occurred while extracting metadata: {e}")
+        event_logger.error(f"An error occurred while extracting metadata: {e}")
         print(f"An error occurred: {e}")
         return None
 
@@ -186,13 +174,13 @@ def extract_urls_from_pdf(file_path):
     try:
         text = extract_text(file_path)
         urls = re.findall(r'http[s]?://\S+', text)
-        pdf_logger.debug(f"Extracted URLs from PDF: {urls}")
+        event_logger.debug(f"Extracted URLs from PDF: {urls}")
     except FileNotFoundError:
         error_message = f"The file '{file_path}' does not exist."
-        pdf_logger.error(error_message)
+        event_logger.error(error_message)
         print(error_message)
     except Exception as e:
-        pdf_logger.error(f"An error occurred while extracting URLs: {e}")
+        event_logger.error(f"An error occurred while extracting URLs: {e}")
         print(f"An error occurred: {e}")
     
     return urls
@@ -207,15 +195,15 @@ def calculate_file_hash(file_path):
             for byte_block in iter(lambda: f.read(4096), b""):
                 sha256_hash.update(byte_block)
         file_hash = sha256_hash.hexdigest()
-        pdf_logger.debug(f"Calculated SHA-256 hash for the file: {file_hash}")
+        event_logger.debug(f"Calculated SHA-256 hash for the file: {file_hash}")
         return file_hash
     except FileNotFoundError:
         error_message = f"The file '{file_path}' does not exist."
-        pdf_logger.error(error_message)
+        event_logger.error(error_message)
         print(error_message)
         return None
     except Exception as e:
-        pdf_logger.error(f"An error occurred while calculating file hash: {e}")
+        event_logger.error(f"An error occurred while calculating file hash: {e}")
         print(f"An error occurred: {e}")
         return None
 
@@ -232,7 +220,7 @@ def check_file_hash_virustotal(file_hash):
         malicious = last_analysis_stats.get('malicious', 0)
         total = sum(last_analysis_stats.values())
 
-        pdf_logger.debug(f"VirusTotal file scan - Name: {name}, Date: {scan_date}, Malicious: {malicious}, Total: {total}")
+        event_logger.debug(f"VirusTotal file scan - Name: {name}, Date: {scan_date}, Malicious: {malicious}, Total: {total}")
         print(f"File: {name}")
         print(f"Scan Date: {scan_date}")
         print(f"Malicious: {malicious}")
@@ -240,13 +228,13 @@ def check_file_hash_virustotal(file_hash):
     except vt.error.APIError as e:
         if e.code == 'NotFoundError':
             error_message = f"File with hash '{file_hash}' not found in VirusTotal."
-            pdf_logger.error(error_message)
+            event_logger.error(error_message)
             print(error_message)
         else:
-            pdf_logger.error(f"API error occurred: {e}")
+            event_logger.error(f"API error occurred: {e}")
             print(f"API error occurred: {e}")
     except Exception as e:
-        pdf_logger.error(f"Error checking file hash: {e}")
+        event_logger.error(f"Error checking file hash: {e}")
         print(f"Error checking file hash: {e}")
     finally:
         client.close()
@@ -263,44 +251,41 @@ def check_url_virustotal(url):
         malicious = last_analysis_stats.get('malicious', 0)
         total = sum(last_analysis_stats.values())
 
-        pdf_logger.debug(f"VirusTotal URL scan - URL: {url}, Date: {scan_date}, Malicious: {malicious}, Total: {total}")
+        event_logger.debug(f"VirusTotal URL scan - URL: {url}, Date: {scan_date}, Malicious: {malicious}, Total: {total}")
         print(f"URL: {url}")
         print(f"Scan Date: {scan_date}")
         print(f"Malicious: {malicious}")
         print(f"Total Scans: {total}")
     except vt.error.APIError as e:
-        if e.code == 'NotFoundError':
-            error_message = f"URL '{url}' not found in VirusTotal."
-            pdf_logger.error(error_message)
-            print(error_message)
-        else:
-            pdf_logger.error(f"API error occurred: {e}")
-            print(f"API error occurred: {e}")
+        event_logger.error(f"API error occurred: {e}")
+        print(f"API error occurred: {e}")
     except Exception as e:
-        pdf_logger.error(f"Error checking URL: {e}")
+        event_logger.error(f"Error checking URL: {e}")
         print(f"Error checking URL: {e}")
     finally:
         client.close()
 
 def save_to_json(data, filename):
     """
-    Saves the results to a JSON file.
+    Saves data to a JSON file.
     """
     try:
-        os.makedirs(JSON_DIR, exist_ok=True)
-        filepath = os.path.join(JSON_DIR, filename)
-        with open(filepath, 'w') as f:
+        if not os.path.exists(JSON_DIR):
+            os.makedirs(JSON_DIR)
+        
+        file_path = os.path.join(JSON_DIR, filename)
+        with open(file_path, 'w') as f:
             json.dump(data, f, indent=4)
-        pdf_logger.debug(f"Results saved to JSON file: {filepath}")
+        
+        event_logger.debug(f"Saved analysis results to JSON file: {file_path}")
     except Exception as e:
-        pdf_logger.error(f"Error saving to JSON: {e}")
-        print(f"Error saving to JSON: {e}")
+        event_logger.error(f"Error saving data to JSON file: {e}")
 
 def get_current_datetime():
     """
-    Gets the current date and time in the format YYYYMMDD_HHMMSS.
+    Returns the current date and time as a string.
     """
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 if __name__ == "__main__":
     main()
