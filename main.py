@@ -30,7 +30,7 @@ console.print(Panel.fit(f"[bold magenta]FULL FORENSIC TOOL[/bold magenta]\n[bold
 console.print("[bold red]Note: I am not responsible for illegal use of the software[/bold red]")
 
 # Tools list
-tools_table = Table(show_header=False, show_edge=False, show_lines=False, title="Tool Options")
+tools_table = Table(show_header=False, show_edge=False, show_lines=False, title="[bold magenta]Tool Options[bold magenta]")
 
 # Define tools list as per the options given
 ListOfTools = [
