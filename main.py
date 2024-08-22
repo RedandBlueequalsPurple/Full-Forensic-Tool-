@@ -24,10 +24,14 @@ current_date = datetime.now().strftime("%Y-%m-%d")
 console = Console()
 
 # Display header with date
-console.print(Panel.fit(f"[bold magenta]FULL FORENSIC TOOL[/bold magenta]\n[bold yellow]{current_date}[/bold yellow]", title="Coder : Hackeror828"))
+header_message = f"[bold magenta]FULL FORENSIC TOOL[/bold magenta]\n[bold yellow]{current_date}[/bold yellow]"
+console.print(Panel.fit(header_message, title="Coder : Hackeror828"))
+logging.info(f"Displayed header: {header_message}")
 
 # Display warning note
-console.print("[bold red]Note: I am not responsible for illegal use of the software[/bold red]")
+note_message = "[bold red]Note: I am not responsible for illegal use of the software[/bold red]"
+console.print(note_message)
+logging.warning(note_message)
 
 # Tools list
 tools_table = Table(show_header=False, show_edge=False, show_lines=False, title="[bold magenta]Tool Options[bold magenta]")
@@ -43,12 +47,15 @@ ListOfTools = [
 # Add tools to the table
 for tool in ListOfTools:
     tools_table.add_row(f"{tool[0]}", tool[1])
+logging.info("Tools list populated in the table.")
 
 # Display the tools table
 console.print(Panel(tools_table, title="Select a Tool", border_style="bold cyan"))
+logging.info("Displayed tools table.")
 
 while True:
     choice = console.input("Select a tool (number) or type 'exit' to quit: ")
+    logging.info(f"User input: {choice}")
 
     if choice == 'exit':
         console.print("[bold red]Exiting...[/bold red]")
@@ -56,18 +63,18 @@ while True:
         break
 
     tool_mapping = {
-            "0": ("CASE Section", "Tools.CASE"),
-            "1": ("Email Analysis", "Tools.Email_Analysis"),
-            "2": ("PDF Analysis", "Tools.PDF_Analysis"),
-            "3": ("ISO Analysis", "Tools.ISO_Analysis"),
-            "4": ("OVA Analysis", "Tools.OVA_Analysis"),
-            "5": ("URL Analysis", "Tools.URL_Analysis"),
-            "6": ("JSON Analysis", "Tools.JSON_Analysis"),
-            "7": ("DB", "DB.main_DB"),
-            "8": ("PNG Analysis", "Tools.PNG_Analysis"),
-            "9": ("CODE Analysis", "Tools.CODE_Analysis"),
-            "10": ("EXE / DMG Analysis", "Tools.EXE_DMG_Analysis"),
-            "11": ("EVENT VIEWER", "Tools.Event_Viewer")
+        "0": ("CASE Section", "Tools.CASE"),
+        "1": ("Email Analysis", "Tools.Email_Analysis"),
+        "2": ("PDF Analysis", "Tools.PDF_Analysis"),
+        "3": ("ISO Analysis", "Tools.ISO_Analysis"),
+        "4": ("OVA Analysis", "Tools.OVA_Analysis"),
+        "5": ("URL Analysis", "Tools.URL_Analysis"),
+        "6": ("JSON Analysis", "Tools.JSON_Analysis"),
+        "7": ("DB", "DB.main_DB"),
+        "8": ("PNG Analysis", "Tools.PNG_Analysis"),
+        "9": ("CODE Analysis", "Tools.CODE_Analysis"),
+        "10": ("EXE / DMG Analysis", "Tools.EXE_DMG_Analysis"),
+        "11": ("EVENT VIEWER", "Tools.Event_Viewer")
     }
 
     if choice in tool_mapping:
@@ -76,7 +83,7 @@ while True:
         log_tool_selection(choice, module_name)
 
         try:
-            # Example logic: just log and print the tool selected
+            logging.info(f"Attempting to import and run module: {import_path}")
             if choice == "7":
                 import DB.main_DB as main_DB
                 logging.info("Starting DB CLI.")
@@ -86,8 +93,10 @@ while True:
                 logging.info(f"Running main function of {module_name}.")
                 module.main()
         except Exception as e:
-            console.print(f"[bold red]Failed to import or run module '{import_path}' with error: {e}[/bold red]")
-            logging.error(f"Failed to import or run module '{import_path}' with error: {e}")
+            error_message = f"Failed to import or run module '{import_path}' with error: {e}"
+            console.print(f"[bold red]{error_message}[/bold red]")
+            logging.error(error_message)
     else:
-        console.print("[bold red]Invalid choice. Please select a valid tool.[/bold red]")
+        invalid_choice_message = "[bold red]Invalid choice. Please select a valid tool.[/bold red]"
+        console.print(invalid_choice_message)
         logging.warning(f"Invalid choice entered: {choice}")
