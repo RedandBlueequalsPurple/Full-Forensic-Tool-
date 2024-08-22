@@ -7,7 +7,7 @@ import logging
 # Configure logging for this module
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler('event_history.log')  # Use the same log file
+handler = logging.FileHandler('event_history.log')
 handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
