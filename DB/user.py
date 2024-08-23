@@ -3,6 +3,12 @@ import os
 from prettytable import PrettyTable
 from datetime import datetime
 import cmd
+import logging
+
+# Set up logging
+log_file = 'event_history.log'
+logging.basicConfig(filename=log_file, level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define the path to the database file
 db_file = 'db.json'
@@ -12,10 +18,13 @@ def load_data_store():
     if os.path.isfile(db_file):
         try:
             with open(db_file, 'r') as file:
+                logging.info(f"Loading data store from {db_file}")
                 return json.load(file)
         except json.JSONDecodeError:
+            logging.error("Error decoding JSON data store file.")
             print("Error decoding JSON data store file.")
         except IOError:
+            logging.error(f"Error reading the data store file '{db_file}'.")
             print(f"Error reading the data store file '{db_file}'.")
     return {}
 
@@ -75,10 +84,12 @@ def display_data(filter_key=None, filter_group=None):
                 
                 id_counter += 1
 
+        logging.info("Displaying data:")
+        logging.info(f"\n{table}")
         print(table)
     else:
+        logging.info(f"No data available in '{db_file}'.")
         print(f"No data available in '{db_file}'.")
-
 
 def show_groups():
     """Display all unique groups in the data store."""
@@ -90,54 +101,81 @@ def show_groups():
             groups.add(value["group"])
 
     if groups:
-        print("Groups:")
+        logging.info("Displaying groups:")
         for group in groups:
+            logging.info(group)
             print(group)
     else:
+        logging.info("No groups available.")
         print("No groups available.")
 
 class DBCLI(cmd.Cmd):
     prompt = '(User-cli) '
     
+    def preloop(self):
+        logging.info("Starting the User CLI")
+
+    def postloop(self):
+        logging.info("Exiting the User CLI")
+
+    def default(self, line):
+        """Log unknown commands"""
+        logging.warning(f"Unknown command: {line}")
+        print(f"Unknown command: {line}")
+
     def do_display(self, arg):
         """Display all data."""
+        logging.info(f"User input: display {arg}")
         display_data()
 
     def do_filter_key(self, arg):
         """Filter data by key."""
+        logging.info(f"User input: filter_key {arg}")
         key_filter = input("Enter key to filter by: ").strip()
+        logging.info(f"Filter key input: {key_filter}")
         if key_filter:
             display_data(filter_key=key_filter)
         else:
+            logging.warning("No key provided to filter by.")
             print("Please provide a key to filter by.")
 
     def do_filter_group(self, arg):
         """Filter data by group."""
+        logging.info(f"User input: filter_group {arg}")
         group_filter = input("Enter group to filter by (or type 'show groups'): ").strip()
+        logging.info(f"Filter group input: {group_filter}")
         if group_filter.lower() == 'show groups':
             show_groups()
         elif group_filter:
             display_data(filter_group=group_filter)
         else:
+            logging.warning("No group provided to filter by.")
             print("Please provide a group to filter by.")
 
     def do_exit(self, arg):
         """Exit the CLI."""
+        logging.info(f"User input: exit {arg}")
+        logging.info("Exiting...")
         print("Exiting...")
         return True
 
     def do_help(self, arg):
         """Show help information."""
+        logging.info(f"User input: help {arg}")
         if arg:
             cmd.Cmd.do_help(self, arg)
         else:
-            print("\nDocumented commands (type help <topic>):")
-            print("========================================")
-            print("display       Display all data")
-            print("filter_key    Filter data by key")
-            print("filter_group  Filter data by group")
-            print("exit          Exit the CLI")
-            print("help          Show this help message")
+            help_message = (
+                "\nDocumented commands (type help <topic>):\n"
+                "========================================\n"
+                "display       Display all data\n"
+                "filter_key    Filter data by key\n"
+                "filter_group  Filter data by group\n"
+                "exit          Exit the CLI\n"
+                "help          Show this help message\n"
+            )
+            logging.info(f"Displaying help:\n{help_message}")
+            print(help_message)
 
 if __name__ == '__main__':
     DBCLI().cmdloop()

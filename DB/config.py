@@ -6,6 +6,18 @@ import array as arr
 from prettytable import PrettyTable
 from configparser import ConfigParser
 
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('event_history.log')
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
 # Define paths
 db_file = 'db.json'
 csv_file_path = 'data.csv'
@@ -14,6 +26,7 @@ config_file_path = 'config.ini'
 
 def load_db():
     """Load the database from a JSON file."""
+    logger.info("Config-Cli load the database from a JSON file")
     if os.path.isfile(db_file):
         with open(db_file, 'r') as file:
             return json.load(file)
@@ -21,11 +34,13 @@ def load_db():
 
 def save_db(data_store):
     """Save the database to a JSON file."""
+    #logger.info("Config-Cli save the database to the JSON file")
     with open(db_file, 'w') as file:
         json.dump(data_store, file, indent=4)
 
 def display_config(config):
     """Display the current configuration."""
+    #logger.info("Config-Cli is display the current configuration")
     print("\nCurrent Configuration:")
     for key, value in config.items():
         print(f"{key}: {value}")
@@ -257,35 +272,36 @@ def process_and_load_data():
     if os.path.isfile(db_file):
         with open(db_file, 'r') as file:
             json_data = json.load(file)
-        print(f"JSON data loaded from {db_file}")
+        print(f"Loaded data from {db_file}")
+    else:
+        print(f"{db_file} does not exist. Creating a new one.")
+        json_data = {}
 
-    # Read CSV data
+    # Load other data formats
     if os.path.isfile(csv_file_path):
         with open(csv_file_path, 'r') as file:
-            csv_reader = csv.DictReader(file)
-            csv_data = [row for row in csv_reader]
-        print(f"CSV data loaded from {csv_file_path}")
+            reader = csv.DictReader(file)
+            for row in reader:
+                json_data[row['Key']] = row['Value']
+        print(f"Loaded data from {csv_file_path}")
 
-    # Read INI data
-    config = ConfigParser()
     if os.path.isfile(config_file_path):
+        config = ConfigParser()
         config.read(config_file_path)
-        print(f"INI configuration loaded from {config_file_path}")
+        for section in config.sections():
+            for key in config[section]:
+                json_data[key] = config[section][key]
+        print(f"Loaded data from {config_file_path}")
 
-    # Read binary array data
     if os.path.isfile(array_file_path):
         with open(array_file_path, 'rb') as file:
             byte_array = arr.array('B')
             byte_array.fromfile(file, os.path.getsize(array_file_path))
-            array_data = json.loads(byte_array.tobytes().decode())
-        print(f"Binary array data loaded from {array_file_path}")
+            data = json.loads(byte_array.tobytes().decode())
+            json_data.update(data)
+        print(f"Loaded data from {array_file_path}")
 
-def process_data():
-    """Process data by calling different save methods."""
-    data_store = load_db()
-    save_to_csv(data_store, csv_file_path)
-    save_to_config(data_store, config_file_path)
-    save_to_array(data_store, array_file_path)
+    save_db(json_data)
 
 class DBCLI(cmd.Cmd):
     """Command-line interface for managing the database."""
@@ -296,22 +312,27 @@ class DBCLI(cmd.Cmd):
         super().__init__()
         self.config = load_db()
         self.process_and_load_data()
+        logging.info("CLI initialized.")
 
     def process_and_load_data(self):
         """Process and load data from various files."""
+        logging.info("Processing and loading data.")
         process_and_load_data()
 
     def do_add(self, line):
         """Add data manually to the configuration."""
+        logging.info("Running 'add' command.")
         add_manual_data(self.config)
 
     def do_remove(self, line):
         """Remove a key from the configuration."""
+        logging.info("Running 'remove' command.")
         remove_key_from_config(self.config)
 
-    def do_parse_json(self, line):
-        """Parse and add data from a JSON file to the configuration."""
+    def do_load_json(self, line):
+        """Load data from a JSON file into the configuration."""
         file_path = input("Enter the path to the JSON file: ").strip()
+        logging.info(f"Running 'load_json' command with file path: {file_path}")
         if not file_path:
             print("File path cannot be empty.")
             return
@@ -319,32 +340,61 @@ class DBCLI(cmd.Cmd):
 
     def do_display(self, line):
         """Display data from the database, optionally filtered by a key."""
+        logging.info(f"Running 'display' command with filter_key: {line}")
         display_data(line)
 
     def do_group(self, line):
         """Assign a group to keys containing a specified keyword."""
+        logging.info(f"Running 'group' command with keyword: {line}")
         assign_keys_to_group(self.config)
 
-    def do_process(self, line):
-        """Process data and save to various files."""
-        process_data()
+    def do_save_csv(self, line):
+        """Save data to a CSV file."""
+        logging.info("Running 'save_csv' command.")
+        save_to_csv(self.config, csv_file_path)
+
+    def do_save_ini(self, line):
+        """Save data to an INI config file."""
+        logging.info("Running 'save_ini' command.")
+        save_to_config(self.config, config_file_path)
+
+    def do_save_array(self, line):
+        """Save data to a binary array file."""
+        logging.info("Running 'save_array' command.")
+        save_to_array(self.config, array_file_path)
+
+    def do_load_array(self, line):
+        """Load data from a binary array file."""
+        logging.info("Running 'load_array' command.")
+        process_and_load_data()
 
     def do_exit(self, line):
         """Exit the CLI."""
+        logging.info("Exiting CLI.")
         print("Exiting CLI.")
         return True
 
     def do_help(self, line):
         """Display help information."""
+        logging.info("Running 'help' command.")
         print("\nDocumented commands (type help <topic>):")
         print("========================================")
         print("add           Add data manually to the configuration")
-        print("remove        Remove a key from the configuration")
-        print("parse_json    Parse and add data from a JSON file to the configuration")
+        print("exit          Exit the CLI")
+        print("help          Show this help message")
+        print("load_json     Load data from a JSON file into the configuration")
+        print("save_array    Save data to a binary array file")
+        print("save_ini      Save data to an INI config file")
         print("display       Display data from the database, optionally filtered by a key")
         print("group         Assign a group to keys containing a specified keyword")
-        print("process       Process data and save to various files")
-        print("exit          Exit the CLI")
+        print("load_array    Load data from a binary array file")
+        print("remove        Remove a key from the configuration")
+        print("save_csv      Save data to a CSV file")
+
+    def default(self, line):
+        """Handle unknown commands."""
+        logger.warning(f"Unknown command: {line}")
+        print(f"*** Unknown syntax: {line}")
 
 if __name__ == '__main__':
     DBCLI().cmdloop()
