@@ -1,7 +1,7 @@
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
 import colorama
 import logging
 from datetime import datetime
@@ -23,10 +23,34 @@ current_date = datetime.now().strftime("%Y-%m-%d")
 
 console = Console()
 
-# Display header with date
-header_message = f"[bold magenta]FULL FORENSIC TOOL[/bold magenta]\n[bold yellow]{current_date}[/bold yellow]"
-console.print(Panel.fit(header_message, title="Coder : Hackeror828"))
-logging.info(f"Displayed header: {header_message}")
+# Create colored text for the "Coder :" line
+coder_text = Text()
+coder_text.append("Coder : ", style="bold")
+coder_text.append("Red", style="red")
+coder_text.append(" and ", style="bold")
+coder_text.append("Blue", style="blue")
+coder_text.append(" equals ", style="bold")
+coder_text.append("Purple", style="magenta")
+
+# Create the header message
+header_content = Text()
+header_content.append("FULL FORENSIC TOOL\n", style="bold magenta")
+header_content.append("\n")  # Add an empty line for spacing
+header_content.append(f"{current_date}\n", style="bold yellow")
+header_content.append("\n")  # Add an empty line for spacing
+header_content.append(coder_text)
+
+# Create the panel with appropriate padding and border
+header_panel = Panel(
+    header_content,
+    border_style="bold cyan",
+    padding=(1, 2),
+    expand=True
+)
+
+# Display the header panel with colored text inside
+console.print(header_panel)
+logging.info(f"Displayed header: {header_content}")
 
 # Display warning note
 note_message = "[bold red]Note: I am not responsible for illegal use of the software[/bold red]"
