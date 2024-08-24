@@ -77,6 +77,35 @@ logging.info("Tools list populated in the table.")
 console.print(Panel(tools_table, title="Select a Tool", border_style="bold cyan"))
 logging.info("Displayed tools table.")
 
+# Tool mapping with correct import paths
+tool_mapping = {
+    "0": ("CASE Section", "Tools.CASE"),
+    "1": ("Email Analysis", "Tools.Email_Analysis"),
+    "2": ("PDF Analysis", "Tools.PDF_Analysis"),
+    "3": ("ISO Analysis", "Tools.ISO_Analysis"),
+    "4": ("OVA Analysis", "Tools.OVA_Analysis"),
+    "5": ("URL Analysis", "Tools.URL_Analysis"),
+    "6": ("JSON Analysis", "Tools.JSON_Analysis"),
+    "7": ("DB", "Free_Section.DB.main_DB"),
+    "8": ("IMAGE Analysis", "Tools.IMAGE_Analysis"),
+    "9": ("CODE Analysis", "Tools.CODE_Analysis"),
+    "10": ("EXE / DMG Analysis", "Tools.EXE_DMG_Analysis"),
+    "11": ("EVENT VIEWER", "Tools.Event_Viewer")
+}
+
+# Function to dynamically import modules
+def dynamic_import(import_path):
+    try:
+        components = import_path.split('.')
+        module = __import__(components[0], fromlist=components[1:])
+        for comp in components[1:]:
+            module = getattr(module, comp)
+        return module
+    except ImportError as e:
+        error_message = f"Failed to import module '{import_path}' with error: {e}"
+        logging.error(error_message)
+        raise ImportError(error_message)
+
 while True:
     choice = console.input("Select a tool (number) or type 'exit' to quit: ")
     logging.info(f"User input: {choice}")
@@ -86,21 +115,6 @@ while True:
         logging.info("User exited the tool selection.")
         break
 
-    tool_mapping = {
-        "0": ("CASE Section", "Tools.CASE"),
-        "1": ("Email Analysis", "Tools.Email_Analysis"),
-        "2": ("PDF Analysis", "Tools.PDF_Analysis"),
-        "3": ("ISO Analysis", "Tools.ISO_Analysis"),
-        "4": ("OVA Analysis", "Tools.OVA_Analysis"),
-        "5": ("URL Analysis", "Tools.URL_Analysis"),
-        "6": ("JSON Analysis", "Tools.JSON_Analysis"),
-        "7": ("DB", "DB.main_DB"),
-        "8": ("IMAGE Analysis", "Tools.IMAGE_Analysis"),
-        "9": ("CODE Analysis", "Tools.CODE_Analysis"),
-        "10": ("EXE / DMG Analysis", "Tools.EXE_DMG_Analysis"),
-        "11": ("EVENT VIEWER", "Tools.Event_Viewer")
-    }
-
     if choice in tool_mapping:
         module_name, import_path = tool_mapping[choice]
         console.print(f"[bold green]{module_name} was selected[/bold green]")
@@ -109,11 +123,11 @@ while True:
         try:
             logging.info(f"Attempting to import and run module: {import_path}")
             if choice == "7":
-                import DB.main_DB as main_DB
+                import Free_Section.DB.main_DB as main_DB
                 logging.info("Starting DB CLI.")
                 main_DB.DBCLI().cmdloop()  # This will start the CLI for the DB tool
             else:
-                module = __import__(import_path, fromlist=['main'])
+                module = dynamic_import(import_path)
                 logging.info(f"Running main function of {module_name}.")
                 module.main()
         except Exception as e:

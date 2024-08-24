@@ -3,7 +3,7 @@ import sys
 import os
 import cmd
 import logging
-import DB.main_DB as main_DB  # Import the DBCLI class from the main_DB module
+import Free_Section.DB.main_DB as main_DB  # Import the DBCLI class from the main_DB module
 
 # Configure logging
 logger = logging.getLogger(__name__)
