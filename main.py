@@ -40,7 +40,7 @@ tools_table = Table(show_header=False, show_edge=False, show_lines=False, title=
 ListOfTools = [
     [0, 'CASE Section'], [1, 'Email Analysis'], [2, 'PDF Analysis'], [3, 'ISO Analysis'], 
     [4, 'OVA Analysis'], [5, 'URL Analysis'], [6, 'JSON Analysis'], [7, 'DB'], 
-    [8, 'PNG Analysis'], [9, 'CODE Analysis'], [10, 'EXE / DMG Analysis'], 
+    [8, 'IMAGE Analysis'], [9, 'CODE Analysis'], [10, 'EXE / DMG Analysis'], 
     [11, 'EVENT VIEWER']
 ]
 
@@ -71,7 +71,7 @@ while True:
         "5": ("URL Analysis", "Tools.URL_Analysis"),
         "6": ("JSON Analysis", "Tools.JSON_Analysis"),
         "7": ("DB", "DB.main_DB"),
-        "8": ("PNG Analysis", "Tools.PNG_Analysis"),
+        "8": ("IMAGE Analysis", "Tools.IMAGE_Analysis"),
         "9": ("CODE Analysis", "Tools.CODE_Analysis"),
         "10": ("EXE / DMG Analysis", "Tools.EXE_DMG_Analysis"),
         "11": ("EVENT VIEWER", "Tools.Event_Viewer")
