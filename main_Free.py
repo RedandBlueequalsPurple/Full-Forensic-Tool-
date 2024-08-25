@@ -5,6 +5,7 @@ from rich.table import Table
 import colorama
 import logging
 from datetime import datetime
+import random
 
 # Initialize colorama
 colorama.init(autoreset=True)
@@ -57,7 +58,10 @@ note_message = "[bold red]Note: I am not responsible for illegal use of the soft
 console.print(note_message)
 logging.warning(note_message)
 
-# Tools list
+# Define the colors to use
+colors = ["bold red", "bold green", "bold blue", "bold yellow", "bold magenta", "bold cyan", "bold white"]
+
+# Tools list with random colors
 tools_table = Table(show_header=False, show_edge=False, show_lines=False, title="[bold magenta]Tool Options[bold magenta]")
 
 # Define tools list excluding option 0
@@ -68,10 +72,11 @@ ListOfTools = [
     [11, 'EVENT VIEWER']
 ]
 
-# Add tools to the table
+# Add tools to the table with random colors
 for tool in ListOfTools:
-    tools_table.add_row(f"{tool[0]}", tool[1])
-logging.info("Tools list populated in the table.")
+    random_color = random.choice(colors)  # Pick a random color
+    tools_table.add_row(f"{tool[0]}", f"[{random_color}]{tool[1]}[/{random_color}]")
+logging.info("Tools list populated in the table with random colors.")
 
 # Display the tools table
 console.print(Panel(tools_table, title="Select a Tool", border_style="bold cyan"))
