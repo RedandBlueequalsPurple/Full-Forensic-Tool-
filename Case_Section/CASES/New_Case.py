@@ -126,84 +126,58 @@ class CaseManager(cmd.Cmd):
                     self.log_to_case_file("User exited tool selection.")
                 break
             elif Choice == "1":
-                console.print("Email Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "Email_Analysis.py")
-                Email_Analysis = self.import_module_from_path("Email_Analysis", module_path)
-                Email_Analysis.main()
-                self.log_to_case_file("Email Analysis tool selected and executed.")
+                self.select_tool("Email Analysis", "Case_Section/Case_Tools", "Email_Analysis.py")
                 break
             elif Choice == "2":
-                console.print("PDF Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "PDF_Analysis.py")
-                PDF_Analysis = self.import_module_from_path("PDF_Analysis", module_path)
-                PDF_Analysis.main()
-                self.log_to_case_file("PDF Analysis tool selected and executed.")
+                self.select_tool("PDF Analysis", "Case_Section/Case_Tools", "PDF_Analysis.py")
                 break
             elif Choice == "3":
-                console.print("ISO Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "ISO_Analysis.py")
-                ISO_Analysis = self.import_module_from_path("ISO_Analysis", module_path)
-                ISO_Analysis.main()
-                self.log_to_case_file("ISO Analysis tool selected and executed.")
+                self.select_tool("ISO Analysis", "Case_Section/Case_Tools", "ISO_Analysis.py")
                 break
             elif Choice == "4":
-                console.print("OVA Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "OVA_Analysis.py")
-                OVA_Analysis = self.import_module_from_path("OVA_Analysis", module_path)
-                OVA_Analysis.main()
-                self.log_to_case_file("OVA Analysis tool selected and executed.")
+                self.select_tool("OVA Analysis", "Case_Section/Case_Tools", "OVA_Analysis.py")
                 break
             elif Choice == "5":
-                console.print("URL Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "URL_Analysis.py")
-                URL_Analysis = self.import_module_from_path("URL_Analysis", module_path)
-                URL_Analysis.main()
-                self.log_to_case_file("URL Analysis tool selected and executed.")
+                self.select_tool("URL Analysis", "Case_Section/Case_Tools", "URL_Analysis.py")
                 break
             elif Choice == "6":
-                console.print("JSON Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "JSON_Analysis.py")
-                JSON_Analysis = self.import_module_from_path("JSON_Analysis", module_path)
-                JSON_Analysis.main()
-                self.log_to_case_file("JSON Analysis tool selected and executed.")
+                self.select_tool("JSON Analysis", "Case_Section/Case_Tools", "JSON_Analysis.py")
                 break
             elif Choice == "7":
-                console.print("DB was selected", style="bold cyan")
-                module_path = os.path.join("DB", "main_DB.py")
-                main_DB = self.import_module_from_path("main_DB", module_path)
-                main_DB.main()
-                self.log_to_case_file("DB was selected and executed")
+                self.select_tool("DB", "Case_Section/Case_DB", "main_DB.py")
                 break
             elif Choice == "8":
-                console.print("PNG Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "PNG_Analysis.py")
-                PNG_Analysis = self.import_module_from_path("PNG_Analysis", module_path)
-                PNG_Analysis.main()
-                self.log_to_case_file("PNG Analysis tool selected and executed.")
+                self.select_tool("PNG Analysis", "Case_Section/Case_Tools", "PNG_Analysis.py")
                 break
             elif Choice == "9":
-                console.print("CODE Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "CODE_Analysis.py")
-                CODE_Analysis = self.import_module_from_path("CODE_Analysis", module_path)
-                CODE_Analysis.main()
-                self.log_to_case_file("CODE Analysis tool selected and executed.")
+                self.select_tool("CODE Analysis", "Case_Section/Case_Tools", "CODE_Analysis.py")
                 break
             elif Choice == "10":
-                console.print("EXE / DMG Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "EXE_DMG_Analysis.py")
-                EXE_DMG_Analysis = self.import_module_from_path("EXE_DMG_Analysis", module_path)
-                EXE_DMG_Analysis.main()
-                self.log_to_case_file("EXE / DMG Analysis tool selected and executed.")
+                self.select_tool("EXE / DMG Analysis", "Case_Section/Case_Tools", "EXE_DMG_Analysis.py")
                 break
             elif Choice == "11":
-                console.print("EVENT VIEWER Analysis was selected", style="bold cyan")
-                module_path = os.path.join("Tools", "EVENT_VIEWER_Analysis.py")
-                EVENT_VIEWER_Analysis = self.import_module_from_path("EVENT_VIEWER_Analysis", module_path)
-                EVENT_VIEWER_Analysis.main()
-                self.log_to_case_file("EVENT VIEWER Analysis tool selected and executed.")
+                self.select_tool("EVENT VIEWER Analysis", "Case_Section/Case_Tools", "EVENT_VIEWER_Analysis.py")
                 break
             else:
                 console.print("Invalid choice, please select again.", style="bold yellow")
+
+    def select_tool(self, tool_name, tool_dir, tool_script):
+        """Helper method to select and run a tool."""
+        console.print(f"{tool_name} was selected", style="bold cyan")
+        module_path = os.path.join(tool_dir, tool_script)
+        try:
+            tool_module = self.import_module_from_path(tool_name.replace(" ", "_"), module_path)
+            tool_module.main()
+            self.log_to_case_file(f"{tool_name} tool selected and executed.")
+        except FileNotFoundError:
+            console.print(f"[red]Error: The script '{tool_script}' was not found in the '{tool_dir}' directory.[/red]")
+            self.log_to_case_file(f"Error: {tool_name} script not found.")
+        except AttributeError:
+            console.print(f"[red]Error: The '{tool_name}' script does not have a 'main' function.[/red]")
+            self.log_to_case_file(f"Error: {tool_name} script lacks 'main' function.")
+        except Exception as e:
+            console.print(f"[red]An unexpected error occurred while running the '{tool_name}' tool: {e}[/red]")
+            self.log_to_case_file(f"Unexpected error in {tool_name}: {e}")
 
     def do_help(self, arg):
         """Display help information"""
@@ -239,29 +213,30 @@ class CaseManager(cmd.Cmd):
 
     def do_note(self, arg):
         """Add a note to the current case file."""
-        if not self.current_case_file:
-            console.print("[red]No case file created. Please create a case first.[/red]")
+        if not self.case_created:
+            console.print("[red]You must create a case before adding a note.[/red]")
             return
 
-        date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        investigator_name = input("Name of the Investigator: ")
-        note_text = input("Note: ")
-        with open(self.current_case_file, 'a') as file:
-            file.write(f"\n{date_str} - Note by {investigator_name}: {note_text}\n")
-        console.print("[green]Note added to the case file.[/green]")
-        self.log_to_case_file(f"Note added: {note_text}")
+        investigator_name = input("Enter the investigator's name: ")
+        note = input("Enter your note: ")
+
+        self.log_to_case_file(f"Note added by {investigator_name}: {note}")
+
+    def do_exit(self, arg):
+        """Exit the Case Manager CLI."""
+        console.print("Thank you for using the Case Manager CLI. Goodbye!", style="bold red")
+        return True
 
     def import_module_from_path(self, module_name, module_path):
-        """Dynamically import a module from a file path."""
+        """Dynamically import a module from the given file path."""
+        if not os.path.exists(module_path):
+            raise FileNotFoundError(f"Module file '{module_path}' does not exist.")
+
         spec = importlib.util.spec_from_file_location(module_name, module_path)
         module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
         spec.loader.exec_module(module)
         return module
 
-    def do_exit(self, arg):
-        """Exit the CLI."""
-        console.print("Bye!", style="bold red")
-        return True
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     CaseManager().cmdloop()
