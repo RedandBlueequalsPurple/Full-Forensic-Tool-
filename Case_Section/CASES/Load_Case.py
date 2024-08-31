@@ -106,48 +106,77 @@ class CaseFileCLI(cmd.Cmd):
             self.console.print("[red]You must create a case before selecting a tool.[/red]")
             return
 
-        tools = {
-            "1": ("Email", "Email_Analysis.py"),
-            "2": ("PDF", "PDF_Analysis.py"),
-            "3": ("ISO", "ISO_Analysis.py"),
-            "4": ("OVA", "OVA_Analysis.py"),
-            "5": ("URL", "URL_Analysis.py"),
-            "6": ("JSON", "JSON_Analysis.py"),
-            "7": ("DB", "main_DB.py"),
-            "8": ("PNG", "PNG_Analysis.py"),
-            "9": ("CODE", "CODE_Analysis.py"),
-            "10": ("EXE / DMG", "EXE_DMG_Analysis.py"),
-            "11": ("EVENT VIEWER", "EVENT_VIEWER_Analysis.py")
-        }
+        self.console.print(Panel("Choose which tool you need:", title="Tool Selection"))
 
-        self.console.print("[bold]Choose which tool you need:[/bold]")
-        for key, (name, _) in tools.items():
-            self.console.print(f"{key}: {name}")
+        ListOfTools = [
+            [1, 'Email'], [2, 'PDF'], [3, 'ISO'], [4, 'OVA'], [5, 'URL'],
+            [6, 'JSON'], [7, 'DB'], [8, 'PNG'], [9, 'CODE'], [10, 'EXE / DMG'], [11, 'EVENT VIEWER']
+        ]
 
-        choice = input("Choose the tool you need or type 'exit' to quit: ").strip()
+        for tool in ListOfTools:
+            self.console.print(f"{tool[0]}: {tool[1]}")
 
-        if choice == 'exit':
-            self.console.print("Bye!")
-            self.log_to_case_file("User exited tool selection.")
-            return
+        while True:
+            Choice = input("Choose the tool you need or type 'exit' to quit: ")
 
-        if choice in tools:
-            tool_name, module_file = tools[choice]
-            self.console.print(f"[bold]{tool_name} Analysis was selected[/bold]")
-            module_path = os.path.join("Tools", module_file)
-            
-            if choice == "7":
-                module_path = os.path.join(os.path.dirname(__file__), "../..", "FULL FORNSIC TOOL/DB", module_file)
-                main_DB = self.import_module_from_path("main_DB", module_path)
-                main_DB.DBCLI().cmdloop()
+            if Choice == 'exit':
+                self.console.print("Bye!", style="bold red")
+                if self.current_case_number:
+                    self.log_to_case_file("User exited tool selection.")
+                break
+            elif Choice == "1":
+                self.select_tool("Email Analysis", "Case_Section/Case_Tools", "Email_Analysis.py")
+                break
+            elif Choice == "2":
+                self.select_tool("PDF Analysis", "Case_Section/Case_Tools", "PDF_Analysis.py")
+                break
+            elif Choice == "3":
+                self.select_tool("ISO Analysis", "Case_Section/Case_Tools", "ISO_Analysis.py")
+                break
+            elif Choice == "4":
+                self.select_tool("OVA Analysis", "Case_Section/Case_Tools", "OVA_Analysis.py")
+                break
+            elif Choice == "5":
+                self.select_tool("URL Analysis", "Case_Section/Case_Tools", "URL_Analysis.py")
+                break
+            elif Choice == "6":
+                self.select_tool("JSON Analysis", "Case_Section/Case_Tools", "JSON_Analysis.py")
+                break
+            elif Choice == "7":
+                self.select_tool("DB", "Case_Section/Case_DB", "main_DB.py")
+                break
+            elif Choice == "8":
+                self.select_tool("PNG Analysis", "Case_Section/Case_Tools", "PNG_Analysis.py")
+                break
+            elif Choice == "9":
+                self.select_tool("CODE Analysis", "Case_Section/Case_Tools", "CODE_Analysis.py")
+                break
+            elif Choice == "10":
+                self.select_tool("EXE / DMG Analysis", "Case_Section/Case_Tools", "EXE_DMG_Analysis.py")
+                break
+            elif Choice == "11":
+                self.select_tool("EVENT VIEWER Analysis", "Case_Section/Case_Tools", "EVENT_VIEWER_Analysis.py")
+                break
             else:
-                tool_module = self.import_module_from_path(tool_name.replace(" ", "_"), module_path)
-                tool_module.main()
+                self.console.print("Invalid choice, please select again.", style="bold yellow")
 
+    def select_tool(self, tool_name, tool_dir, tool_script):
+        """Helper method to select and run a tool."""
+        self.console.print(f"{tool_name} was selected", style="bold cyan")
+        module_path = os.path.join(tool_dir, tool_script)
+        try:
+            tool_module = self.import_module_from_path(tool_name.replace(" ", "_"), module_path)
+            tool_module.main()
             self.log_to_case_file(f"{tool_name} tool selected and executed.")
-        else:
-            self.console.print("[red]Invalid choice. Please try again.[/red]")
-            self.log_to_case_file("Invalid tool selection attempted.")
+        except FileNotFoundError:
+            self.console.print(f"[red]Error: The script '{tool_script}' was not found in the '{tool_dir}' directory.[/red]")
+            self.log_to_case_file(f"Error: {tool_name} script not found.")
+        except AttributeError:
+            self.console.print(f"[red]Error: The '{tool_name}' script does not have a 'main' function.[/red]")
+            self.log_to_case_file(f"Error: {tool_name} script lacks 'main' function.")
+        except Exception as e:
+            self.console.print(f"[red]An unexpected error occurred while running the '{tool_name}' tool: {e}[/red]")
+            self.log_to_case_file(f"Unexpected error in {tool_name}: {e}")
 
     def log_to_case_file(self, message):
         """Log a message to the current case file."""
@@ -190,38 +219,41 @@ class CaseFileCLI(cmd.Cmd):
 
             self.console.print("[green]Note added successfully.[/green]")
 
-            # Log the note addition event
             if self.log_file:
-                logging.info("Added note to case file.")
+                logging.info(f"Note added by {investigator_name}: {note_content}")
 
         except Exception as e:
             self.console.print(f"[red]An error occurred while adding the note: {e}[/red]")
             if self.log_file:
-                logging.error(f"Error adding note to file: {e}")
-
-    def do_exit(self, arg):
-        """Exit the CaseFileCLI."""
-        self.console.print("Exiting...")
-        return True
+                logging.error(f"Error adding note: {e}")
 
     def do_help(self, arg):
-        """Display help information"""
-        if arg:
-            cmd.Cmd.do_help(self, arg)
-        else:
-            # Create a table to display the help information
-            help_table = Table(title="Available Commands", box=None)
-            help_table.add_column("Command", style="bold magenta")
-            help_table.add_column("Description", style="bold white")
-            help_table.add_row("load", "Load an existing case file")
-            help_table.add_row("list_cases", "List all archived cases")
-            help_table.add_row("note", "Add a note to the current case file")
-            help_table.add_row("tool", "Select a tool to analyze the case")
-            help_table.add_row("exit", "Exit the CASE system")
-            help_table.add_row("help", "Show this help message")
+        """Display this help message."""
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("Command", style="bold green")
+        table.add_column("Description", style="bold yellow")
 
-            self.console.print(help_table)
+        commands = [
+            ("load", "Load an existing case file"),
+            ("list_cases", "List all case files in 'archive cases'"),
+            ("note", "Add a note to the current case file"),
+            ("tool", "Select a tool to use"),
+            ("help", "Display this help message"),
+            ("exit", "Exit the CaseFileCLI")
+        ]
+
+        for command, description in commands:
+            table.add_row(command, description)
+
+        self.console.print(table)
+
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        if self.current_case_number:
+            self.log_to_case_file("User exited the CLI.")
+        self.console.print("Goodbye!", style="bold red")
+        return True
 
 if __name__ == '__main__':
-    case_file_cli = CaseFileCLI(file_path="")
-    case_file_cli.cmdloop()
+    cli = CaseFileCLI("casefile.txt")
+    cli.cmdloop()
