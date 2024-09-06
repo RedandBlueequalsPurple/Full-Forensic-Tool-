@@ -1,17 +1,14 @@
 import os
 import re
-import cmd
-import importlib.util
-import sys
 from datetime import datetime
+import cmd
+import sys
+import importlib.util
 from rich.console import Console
 from rich.panel import Panel
-from rich.text import Text
 from rich.table import Table
-import colorama
-colorama.init(autoreset=True)
 
-# Initialize the console for rich output
+# Initialize console for Rich
 console = Console()
 
 class CaseManager(cmd.Cmd):
@@ -110,8 +107,17 @@ class CaseManager(cmd.Cmd):
         console.print(Panel("Choose which tool you need:", title="Tool Selection"))
 
         ListOfTools = [
-            [1, 'Email'], [2, 'PDF'], [3, 'ISO'], [4, 'OVA'], [5, 'URL'],
-            [6, 'JSON'], [7, 'DB'], [8, 'PNG'], [9, 'CODE'], [10, 'EXE / DMG'], [11, 'EVENT VIEWER']
+            [1, 'Email Analysis', "Case_Section/Case_Tools", "Email_Analysis.py"],
+            [2, 'PDF Analysis', "Case_Section/Case_Tools", "PDF_Analysis.py"],
+            [3, 'ISO Analysis', "Case_Section/Case_Tools", "ISO_Analysis.py"],
+            [4, 'OVA Analysis', "Case_Section/Case_Tools", "OVA_Analysis.py"],
+            [5, 'URL Analysis', "Case_Section/Case_Tools", "URL_Analysis.py"],
+            [6, 'JSON Analysis', "Case_Section/Case_Tools", "JSON_Analysis.py"],
+            [7, 'main_DB', "Case_Section/CASES/Case_DB", "main_DB.py"],
+            [8, 'IMAGE Analysis', "Case_Section/Case_Tools", "IMAGE_Analysis.py"],
+            [9, 'CODE Analysis', "Case_Section/Case_Tools", "CODE_Analysis.py"],
+            [10, 'EXE / DMG Analysis', "Case_Section/Case_Tools", "EXE_DMG_Analysis.py"],
+            [11, 'EVENT VIEWER', "Case_Section/Case_Tools", "EVENT_VIEWER_Analysis.py"]
         ]
 
         for tool in ListOfTools:
@@ -121,60 +127,51 @@ class CaseManager(cmd.Cmd):
             Choice = input("Choose the tool you need or type 'exit' to quit: ")
 
             if Choice == 'exit':
-                console.print("Bye!", style="bold red")
+                console.print("Exiting tool selection...", style="bold red")
                 if self.current_case_file:
                     self.log_to_case_file("User exited tool selection.")
                 break
-            elif Choice == "1":
-                self.select_tool("Email Analysis", "Case_Section/Case_Tools", "Email_Analysis.py")
-                break
-            elif Choice == "2":
-                self.select_tool("PDF Analysis", "Case_Section/Case_Tools", "PDF_Analysis.py")
-                break
-            elif Choice == "3":
-                self.select_tool("ISO Analysis", "Case_Section/Case_Tools", "ISO_Analysis.py")
-                break
-            elif Choice == "4":
-                self.select_tool("OVA Analysis", "Case_Section/Case_Tools", "OVA_Analysis.py")
-                break
-            elif Choice == "5":
-                self.select_tool("URL Analysis", "Case_Section/Case_Tools", "URL_Analysis.py")
-                break
-            elif Choice == "6":
-                self.select_tool("JSON Analysis", "Case_Section/Case_Tools", "JSON_Analysis.py")
-                break
-            elif Choice == "7":
-                self.select_tool("DB", "Case_Section/Case_DB", "main_DB.py")
-                break
-            elif Choice == "8":
-                self.select_tool("PNG Analysis", "Case_Section/Case_Tools", "PNG_Analysis.py")
-                break
-            elif Choice == "9":
-                self.select_tool("CODE Analysis", "Case_Section/Case_Tools", "CODE_Analysis.py")
-                break
-            elif Choice == "10":
-                self.select_tool("EXE / DMG Analysis", "Case_Section/Case_Tools", "EXE_DMG_Analysis.py")
-                break
-            elif Choice == "11":
-                self.select_tool("EVENT VIEWER Analysis", "Case_Section/Case_Tools", "EVENT_VIEWER_Analysis.py")
-                break
+            for tool in ListOfTools:
+                if Choice == str(tool[0]):
+                    self.select_tool(tool[1], tool[2], tool[3])
+                    break
             else:
                 console.print("Invalid choice, please select again.", style="bold yellow")
+
+    def do_exit(self, arg):
+        """Exit the CLI."""
+        console.print("Exiting the Case Manager CLI. Goodbye!", style="bold red")
+        if self.current_case_file:
+            self.log_to_case_file("User exited the CLI.")
+        return True  # Return True to exit cmdloop
 
     def select_tool(self, tool_name, tool_dir, tool_script):
         """Helper method to select and run a tool."""
         console.print(f"{tool_name} was selected", style="bold cyan")
         module_path = os.path.join(tool_dir, tool_script)
+        console.print(f"Looking for module at: {module_path}", style="bold yellow")
+
         try:
-            tool_module = self.import_module_from_path(tool_name.replace(" ", "_"), module_path)
-            tool_module.main()
-            self.log_to_case_file(f"{tool_name} tool selected and executed.")
+            # Ensure the tool directory is in the sys.path
+            if tool_dir not in sys.path:
+                sys.path.append(os.path.abspath(tool_dir))
+            # Update module name for the import statement
+            module_name = os.path.splitext(tool_script)[0]
+            tool_module = self.import_module_from_path(module_name, module_path)
+            
+            # Check if the 'main' function exists in the module
+            if hasattr(tool_module, 'main') and callable(getattr(tool_module, 'main')):
+                tool_module.main()
+                self.log_to_case_file(f"{tool_name} tool selected and executed.")
+            else:
+                raise AttributeError(f"The '{tool_name}' script does not have a callable 'main' function.")
+            
         except FileNotFoundError:
             console.print(f"[red]Error: The script '{tool_script}' was not found in the '{tool_dir}' directory.[/red]")
             self.log_to_case_file(f"Error: {tool_name} script not found.")
-        except AttributeError:
-            console.print(f"[red]Error: The '{tool_name}' script does not have a 'main' function.[/red]")
-            self.log_to_case_file(f"Error: {tool_name} script lacks 'main' function.")
+        except AttributeError as e:
+            console.print(f"[red]Error: {e}[/red]")
+            self.log_to_case_file(f"Error: {e}")
         except Exception as e:
             console.print(f"[red]An unexpected error occurred while running the '{tool_name}' tool: {e}[/red]")
             self.log_to_case_file(f"Unexpected error in {tool_name}: {e}")
@@ -200,41 +197,16 @@ class CaseManager(cmd.Cmd):
     def do_list(self, arg):
         """List all archived cases."""
         files = os.listdir(self.archive_folder)
-        case_files = [f for f in files if f.startswith("case ") and f.endswith(".txt")]
+        case_files = [f for f in files if f.endswith(".txt")]
         if case_files:
-            case_table = Table(title="Archived Cases", box=None)
-            case_table.add_column("Case Number", style="bold magenta")
-            for case_file in sorted(case_files):
-                case_number = case_file.split('.')[0]
-                case_table.add_row(case_number)
-            console.print(case_table)
+            console.print(Panel(f"Archived Cases:\n" + "\n".join(case_files), title="Case Files"))
         else:
-            console.print("[yellow]No archived cases found.[/yellow]")
-
-    def do_note(self, arg):
-        """Add a note to the current case file."""
-        if not self.case_created:
-            console.print("[red]You must create a case before adding a note.[/red]")
-            return
-
-        investigator_name = input("Enter the investigator's name: ")
-        note = input("Enter your note: ")
-
-        self.log_to_case_file(f"Note added by {investigator_name}: {note}")
-
-    def do_exit(self, arg):
-        """Exit the Case Manager CLI."""
-        console.print("Thank you for using the Case Manager CLI. Goodbye!", style="bold red")
-        return True
+            console.print("No case files found.", style="bold yellow")
 
     def import_module_from_path(self, module_name, module_path):
-        """Dynamically import a module from the given file path."""
-        if not os.path.exists(module_path):
-            raise FileNotFoundError(f"Module file '{module_path}' does not exist.")
-
+        """Import a module from a given file path."""
         spec = importlib.util.spec_from_file_location(module_name, module_path)
         module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
         spec.loader.exec_module(module)
         return module
 

@@ -3,7 +3,6 @@ import sys
 import os
 import cmd
 import logging
-import Case_DB.main_DB as main_DB  # Import the DBCLI class from the main_DB module
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -94,12 +93,16 @@ class DBCLI(cmd.Cmd):
         logger.warning(f"Unknown command: {line}")
         print(f"*** Unknown syntax: {line}")
 
-# Ensure that the script runs the DBCLI command loop when executed directly
-if __name__ == '__main__':
+def main():
+    """Main function to start the DBCLI command loop."""
     logger.info("Starting DBCLI command loop.")
     try:
-        main_DB.DBCLI().cmdloop()
+        db_cli = DBCLI()
+        db_cli.cmdloop()
     except Exception as e:
         logger.error(f"An error occurred in the DBCLI: {e}")
     finally:
         logger.info("DBCLI command loop terminated.")
+
+if __name__ == '__main__':
+    main()
