@@ -10,6 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 import colorama
 
+
 colorama.init(autoreset=True)
 
 class CaseFileCLI(cmd.Cmd):
